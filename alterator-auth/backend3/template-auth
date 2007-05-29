@@ -1,0 +1,43 @@
+#!/bin/sh 
+
+#turn off auto expansion
+set -f
+
+_()
+{
+LANG=${in_language%%;*}.utf8 gettext "alterator-auth" "$1"
+}
+
+. /usr/share/alterator/build/backend3.sh
+
+on_message()
+{
+	case "$in_action" in
+		#information for renderer
+		template)
+			[ -n "$in_profile" ] || in_profile="$(control system-auth)"
+
+			echo '('
+			echo 'template "form" '
+
+			if [ "$in_profile" = "ldap" ];then
+			    echo 'url "auth-ldap.html"'
+			else
+			    echo 'url "auth-local.html"'
+			fi
+
+			echo ')'
+			;;
+		info)
+			echo '('
+			printf ' title "%s"' "`_ "Authentication"`"
+			printf ' description "%s"' "`_ "Authentication schema setup"`"
+			printf ' group "%s"' "`_ "Users"`"
+			echo ')'
+			;;
+		*)
+			echo '#f'
+	esac
+}
+
+message_loop

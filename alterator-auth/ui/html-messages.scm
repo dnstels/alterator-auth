@@ -1,0 +1,7 @@
+(_ "Authentication")
+(_ "Select")
+(_ "Authentication")
+(_ "Select")
+(_ "LDAP settings")
+(_ "Apply")
+(_ "Reset")

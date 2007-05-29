@@ -1,0 +1,73 @@
+#!/bin/sh
+
+LDAP_CONFIG="/etc/pam_ldap.conf"
+
+_()
+{
+    LANG=${in_language%%;*}.utf8 gettext "alterator-auth" "$1"
+}
+
+list_profile()
+{
+    printf '("local" label "%s")' "`_ "local"`"
+    printf '("ldap" label "%s")' "`_ "LDAP"`"
+}
+
+read_ldap()
+{
+    [ -f "$LDAP_CONFIG" ] && sed -nr "s,^$1[[:space:]]([^[:space:]]+),\1,p" "$LDAP_CONFIG"
+}
+
+write_ldap()
+{
+    if grep -qs "^$1[[:space:]]" "$LDAP_CONFIG" ;then
+	sed -r "s#^$1[[:space:]].*#$1 $2#" -i "$LDAP_CONFIG"
+    else
+	echo "$1 $2" >>"$LDAP_CONFIG"
+    fi
+}
+
+#turn off auto expansion
+set -f
+
+. /usr/share/alterator/build/backend3.sh
+
+on_message()
+{
+	case "$in_action" in
+	    constraints)
+		echo '('
+		printf 'profile (label "%s")' "`_ "Auth type"`"
+		printf 'ldap_uri (label "%s")' "`_ "LDAP server"`"
+		printf 'ldap_basedn (label "%s")' "`_ "Base DN"`"
+		echo ')'
+		;;
+	    list)
+		echo '('
+		[ "$in__objects" = "avail_profile" ] && list_profile
+		echo ')'
+		;;
+	    read)
+		echo '('
+		local profile="$(control system-auth)"
+
+		printf 'profile "%s"' "$profile"
+		if [ "$profile" = "ldap" ];then
+		    printf 'ldap_uri "%s"\n' "$(read_ldap uri)"
+		    printf 'ldap_basedn "%s"\n' "$(read_ldap base)"
+		fi
+		echo ')'
+		;;
+	    write)
+		[ -n "$in_profile" ] && control system-auth "$in_profile"
+	        [ -n "$in_ldap_uri" ] && write_ldap uri "$in_ldap_uri"
+	        [ -n "$in_ldap_basedn" ] && write_ldap base "$in_ldap_basedn"
+		echo '()'
+		;;
+	    *)
+		echo '#f'
+		;;
+	esac
+}
+
+message_loop
