@@ -10,7 +10,7 @@ _()
 list_profile()
 {
     printf '("local" label "%s")' "`_ "local"`"
-    printf '("ldap" label "%s")' "`_ "LDAP"`"
+    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] && printf '("ldap" label "%s")' "`_ "LDAP"`"
 }
 
 read_ldap()

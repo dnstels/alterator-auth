@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.1
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -38,5 +38,8 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Wed May 30 2007 Stanislav Ievlev <inger@altlinux.org> 0.1-alt2
+- exclude ldap from list if appropriate nss module doesn't exists
+
 * Tue May 29 2007 Stanislav Ievlev <inger@altlinux.org> 0.1-alt1
 - Initial release
