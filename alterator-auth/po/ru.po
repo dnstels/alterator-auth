@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-05-29 14:29+0400\n"
+"POT-Creation-Date: 2007-05-31 14:22+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/html-messages.scm:1 ui/html-messages.scm:3 backend3/template-auth:32
+#: ui/html-messages.scm:1 ui/html-messages.scm:3 backend3/template-auth:33
 msgid "Authentication"
 msgstr "Аутентификация"
 
@@ -35,34 +35,38 @@ msgstr "Принять"
 msgid "Reset"
 msgstr "Сброс"
 
-#: backend3/auth:5 backend3/template-auth:8
+#: backend3/auth:7 backend3/template-auth:8
 msgid "alterator-auth"
 msgstr ""
 
-#: backend3/auth:10
+#: backend3/auth:12
 msgid "local"
 msgstr "локально"
 
-#: backend3/auth:11
+#: backend3/auth:13
 msgid "LDAP"
 msgstr "через LDAP"
 
-#: backend3/auth:24
+#: backend3/auth:42
 msgid "Auth type"
 msgstr "Тип аутентификации"
 
-#: backend3/auth:25
+#: backend3/auth:44
 msgid "LDAP server"
 msgstr "Сервер LDAP"
 
-#: backend3/auth:26
+#: backend3/auth:46
+msgid "should be ldap://host or ldapi://host or ldaps://host"
+msgstr "должно быть ldap://host или ldapi://host или ldaps://host"
+
+#: backend3/auth:47
 msgid "Base DN"
 msgstr "Базовый DN"
 
-#: backend3/template-auth:33
+#: backend3/template-auth:34
 msgid "Authentication schema setup"
 msgstr "Настройка схемы аутентификации"
 
-#: backend3/template-auth:34
+#: backend3/template-auth:35
 msgid "Users"
 msgstr "Пользователи"

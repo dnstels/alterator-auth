@@ -32,13 +32,18 @@ set -f
 
 . /usr/share/alterator/build/backend3.sh
 
+LDAP_URI="(ldap|ldapi|ldaps)://[a-z0-9.]+"
+
 on_message()
 {
 	case "$in_action" in
 	    constraints)
 		echo '('
 		printf 'profile (label "%s")' "`_ "Auth type"`"
-		printf 'ldap_uri (label "%s")' "`_ "LDAP server"`"
+		printf 'ldap_uri (label "%s" match ("%s" "%s"))' \
+		    "`_ "LDAP server"`" \
+		    "$LDAP_URI" \
+		    "`_ "should be ldap://host or ldapi://host or ldaps://host"`"
 		printf 'ldap_basedn (label "%s")' "`_ "Base DN"`"
 		echo ')'
 		;;
