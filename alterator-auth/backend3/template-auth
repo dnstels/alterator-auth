@@ -19,6 +19,7 @@ on_message()
 
 			echo '('
 			echo 'template "form" '
+			echo 'help "auth.html" '
 
 			if [ "$in_profile" = "ldap" ];then
 			    echo 'url "auth-ldap.html"'
