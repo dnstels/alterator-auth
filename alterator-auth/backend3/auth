@@ -34,6 +34,9 @@ set -f
 
 LDAP_URI="(ldap|ldapi|ldaps)://[a-z0-9.]+"
 
+#comment host option to avoid conflict with uri
+sed -r 's,^(host[[:space:]]),#\1,' -i "$LDAP_CONFIG"
+
 on_message()
 {
 	case "$in_action" in
