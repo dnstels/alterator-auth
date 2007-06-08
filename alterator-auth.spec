@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.1
-Release: alt5
+Release: alt6
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -38,6 +38,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Jun 08 2007 Stanislav Ievlev <inger@altlinux.org> 0.1-alt6
+- help improvements from kirill@
+
 * Tue Jun 05 2007 Stanislav Ievlev <inger@altlinux.org> 0.1-alt5
 - comment out 'host' option to avoid conflict with uri
 
