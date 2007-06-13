@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.1
-Release: alt6
+Version: 0.2
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -34,10 +34,16 @@ alterator module for system wide auth settings
 %find_lang %name
 
 %files -f %name.lang
+%_datadir/alterator/applications/*
+%_datadir/alterator/ui/*
 %_var/www/html/*
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Jun 13 2007 Stanislav Ievlev <inger@altlinux.org> 0.2-alt1
+- add qt ui
+- html ui improvements
+
 * Fri Jun 08 2007 Stanislav Ievlev <inger@altlinux.org> 0.1-alt6
 - help improvements from kirill@
 

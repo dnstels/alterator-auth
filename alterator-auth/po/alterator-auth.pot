@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-05-31 14:22+0400\n"
+"POT-Creation-Date: 2007-06-13 19:07+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,23 +16,41 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/html-messages.scm:1 ui/html-messages.scm:3 backend3/template-auth:33
-msgid "Authentication"
+#: ui/auth/index.scm:50 backend3/auth:45
+msgid "Auth type"
 msgstr ""
 
-#: ui/html-messages.scm:2 ui/html-messages.scm:4
-msgid "Select"
+#: ui/auth/index.scm:59 backend3/auth:47
+msgid "LDAP server"
 msgstr ""
 
-#: ui/html-messages.scm:5
-msgid "LDAP settings"
+#: ui/auth/index.scm:64 backend3/auth:50
+msgid "Base DN"
 msgstr ""
 
-#: ui/html-messages.scm:6
+#. zerg's spacer
+#: ui/auth/index.scm:70 ui/auth/html-messages.scm:6
 msgid "Apply"
 msgstr ""
 
-#: ui/html-messages.scm:7
+#: ui/auth/index.scm:71
+msgid "Quit"
+msgstr ""
+
+#: ui/auth/html-messages.scm:1 ui/auth/html-messages.scm:3
+#: backend3/template-auth:34
+msgid "Authentication"
+msgstr ""
+
+#: ui/auth/html-messages.scm:2 ui/auth/html-messages.scm:4
+msgid "Select"
+msgstr ""
+
+#: ui/auth/html-messages.scm:5
+msgid "LDAP settings"
+msgstr ""
+
+#: ui/auth/html-messages.scm:7
 msgid "Reset"
 msgstr ""
 
@@ -48,26 +66,14 @@ msgstr ""
 msgid "LDAP"
 msgstr ""
 
-#: backend3/auth:42
-msgid "Auth type"
-msgstr ""
-
-#: backend3/auth:44
-msgid "LDAP server"
-msgstr ""
-
-#: backend3/auth:46
+#: backend3/auth:49
 msgid "should be ldap://host or ldapi://host or ldaps://host"
 msgstr ""
 
-#: backend3/auth:47
-msgid "Base DN"
-msgstr ""
-
-#: backend3/template-auth:34
+#: backend3/template-auth:35
 msgid "Authentication schema setup"
 msgstr ""
 
-#: backend3/template-auth:35
+#: backend3/template-auth:36
 msgid "Users"
 msgstr ""
