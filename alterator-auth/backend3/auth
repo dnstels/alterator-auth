@@ -60,10 +60,8 @@ on_message()
 		local profile="$(control system-auth)"
 
 		printf 'profile "%s"' "$profile"
-		if [ "$profile" = "ldap" ];then
-		    printf 'ldap_uri "%s"\n' "$(read_ldap uri)"
-		    printf 'ldap_basedn "%s"\n' "$(read_ldap base)"
-		fi
+		printf 'ldap_uri "%s"\n' "$(read_ldap uri)"
+		printf 'ldap_basedn "%s"\n' "$(read_ldap base)"
 		echo ')'
 		;;
 	    write)

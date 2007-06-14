@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.2
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -40,6 +40,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Thu Jun 14 2007 Stanislav Ievlev <inger@altlinux.org> 0.2-alt2
+- fix backend
+
 * Wed Jun 13 2007 Stanislav Ievlev <inger@altlinux.org> 0.2-alt1
 - add qt ui
 - html ui improvements
