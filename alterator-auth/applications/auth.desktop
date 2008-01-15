@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
 Categories=X-Alterator-Users
 Icon=auth
@@ -8,3 +7,4 @@ Name=Authentication
 Name[ru_RU]=Аутентификация
 X-Alterator-URI=/auth
 X-Alterator-Weight=20
+X-Alterator-Help=auth

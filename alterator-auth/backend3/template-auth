@@ -19,7 +19,6 @@ on_message()
 
 			echo '('
 			echo 'template "form" '
-			echo 'help "auth.html" '
 
 			if [ "$in_profile" = "ldap" ];then
 			    echo 'url "auth-ldap.html"'
@@ -27,13 +26,6 @@ on_message()
 			    echo 'url "auth-local.html"'
 			fi
 
-			echo ')'
-			;;
-		info)
-			echo '('
-			printf ' title "%s"' "`_ "Authentication"`"
-			printf ' description "%s"' "`_ "Authentication schema setup"`"
-			printf ' group "%s"' "`_ "Users"`"
 			echo ')'
 			;;
 		*)

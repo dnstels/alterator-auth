@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LDAP_CONFIG="/etc/pam_ldap.conf"
+ldapfile="/etc/pam_ldap.conf"
 
 _()
 {
@@ -15,15 +15,15 @@ list_profile()
 
 read_ldap()
 {
-    [ -f "$LDAP_CONFIG" ] && sed -nr "s,^$1[[:space:]]([^[:space:]]+),\1,p" "$LDAP_CONFIG"
+    [ -f "$ldapfile" ] && sed -nr "s,^$1[[:space:]]([^[:space:]]+),\1,p" "$ldapfile"
 }
 
 write_ldap()
 {
-    if grep -qs "^$1[[:space:]]" "$LDAP_CONFIG" ;then
-	sed -r "s#^$1[[:space:]].*#$1 $2#" -i "$LDAP_CONFIG"
+    if grep -qs "^$1[[:space:]]" "$ldapfile" ;then
+	sed -r "s#^$1[[:space:]].*#$1 $2#" -i "$ldapfile"
     else
-	echo "$1 $2" >>"$LDAP_CONFIG"
+	echo "$1 $2" >>"$ldapfile"
     fi
 }
 
@@ -35,7 +35,7 @@ set -f
 LDAP_URI="(ldap|ldapi|ldaps)://[a-z0-9.]+"
 
 #comment host option to avoid conflict with uri
-sed -r 's,^(host[[:space:]]),#\1,' -i "$LDAP_CONFIG"
+sed -r 's,^(host[[:space:]]),#\1,' -i "$ldapfile"
 
 on_message()
 {

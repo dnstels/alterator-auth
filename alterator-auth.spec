@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.2
-Release: alt2
+Version: 0.3
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -14,8 +14,9 @@ License: GPL
 Group: System/Configuration/Other
 Requires: alterator >= 2.9 gettext
 Requires: pam-config >= 1.4.0-alt1.1
+Conflicts: alterator-fbi < 0.15-alt2
 
-BuildPreReq: alterator >= 2.9-alt0.10, alterator-standalone >= 2.5-alt0.3, alterator-fbi >= 0.7-alt1
+BuildPreReq: alterator >= 3.1 alterator-fbi >= 0.7-alt1
 
 # Automatically added by buildreq on Mon Jul 11 2005 (-bi)
 BuildRequires: alterator
@@ -36,10 +37,14 @@ alterator module for system wide auth settings
 %files -f %name.lang
 %_datadir/alterator/applications/*
 %_datadir/alterator/ui/*
+%_datadir/alterator/help/*/*
 %_var/www/html/*
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Jan 15 2008 Stanislav Ievlev <inger@altlinux.org> 0.3-alt1
+- update to new help system
+
 * Thu Jun 14 2007 Stanislav Ievlev <inger@altlinux.org> 0.2-alt2
 - fix backend
 
