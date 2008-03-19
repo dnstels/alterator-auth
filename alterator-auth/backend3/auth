@@ -1,11 +1,16 @@
 #!/bin/sh
 
+po_domain="alterator-auth"
 ldapfile="/etc/pam_ldap.conf"
+ldap_uri_re='(ldap|ldapi|ldaps)://[a-z0-9.]+'
+rdelim='[[:space:]]\+'
+wdelim=' '
 
-_()
-{
-    LANG=${in_language%%;*}.utf8 gettext "alterator-auth" "$1"
-}
+. alterator-sh-functions
+. shell-config
+
+#turn off auto expansion
+set -f
 
 list_profile()
 {
@@ -15,24 +20,14 @@ list_profile()
 
 read_ldap()
 {
-    [ -f "$ldapfile" ] && sed -nr "s,^$1[[:space:]]([^[:space:]]+),\1,p" "$ldapfile"
+    shell_config_get "$ldapfile" "$1" "$rdelim"
 }
 
 write_ldap()
 {
-    if grep -qs "^$1[[:space:]]" "$ldapfile" ;then
-	sed -r "s#^$1[[:space:]].*#$1 $2#" -i "$ldapfile"
-    else
-	echo "$1 $2" >>"$ldapfile"
-    fi
+    shell_config_set "$ldapfile" "$1" "$2" "$rdelim" "$wdelim"
 }
 
-#turn off auto expansion
-set -f
-
-. /usr/share/alterator/build/backend3.sh
-
-LDAP_URI="(ldap|ldapi|ldaps)://[a-z0-9.]+"
 
 #comment host option to avoid conflict with uri
 sed -r 's,^(host[[:space:]]),#\1,' -i "$ldapfile"
@@ -45,7 +40,7 @@ on_message()
 		printf 'profile (label "%s")' "`_ "Auth type"`"
 		printf 'ldap_uri (label "%s" match ("%s" "%s"))' \
 		    "`_ "LDAP server"`" \
-		    "$LDAP_URI" \
+		    "$ldap_uri_re" \
 		    "`_ "should be ldap://host or ldapi://host or ldaps://host"`"
 		printf 'ldap_basedn (label "%s")' "`_ "Base DN"`"
 		echo ')'
@@ -57,7 +52,7 @@ on_message()
 		;;
 	    read)
 		echo '('
-		local profile="$(control system-auth)"
+		local profile="$(/usr/sbin/control system-auth)"
 
 		printf 'profile "%s"' "$profile"
 		printf 'ldap_uri "%s"\n' "$(read_ldap uri)"
@@ -65,10 +60,10 @@ on_message()
 		echo ')'
 		;;
 	    write)
-		[ -n "$in_profile" ] && control system-auth "$in_profile"
+		[ -n "$in_profile" ] && /usr/sbin/control system-auth "$in_profile"
 	        [ -n "$in_ldap_uri" ] && write_ldap uri "$in_ldap_uri"
 	        [ -n "$in_ldap_basedn" ] && write_ldap base "$in_ldap_basedn"
-		echo '()'
+	        write_nop
 		;;
 	    *)
 		echo '#f'

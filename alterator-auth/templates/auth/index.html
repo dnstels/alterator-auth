@@ -1,34 +1,37 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <!-- authentication administration module -->
-<html>
+<html wf="form?case-attribute=profile">
   <head>
     <title>Authentication - ALT Linux Console</title>
   </head>
   <body>
     <h1><span translate="_">Authentication</span></h1>
     <form method="POST">
-      <label for="profile"/>
-      <select name="profile" optionlist="avail_profile" id="auth-select"/>
-      <input type="submit" value="Apply" class="btn"/>
+      <span translate="_">Auth type</span>
+      <select name="profile" optionlist="avail_profile"/>
+      <input type="submit" value="Change" class="btn"/>
     </form>
-    <form method="POST">
+    <hr/>
+    <form method="POST" case="local">
       <input type="hidden" name="profile"/>
-      <fieldset>
-      <legend><span translate="_">LDAP settings</span></legend>
+    </form>
+    <form method="POST" case="ldap">
+      <input type="hidden" name="profile"/>
+      <h2><span translate="_">LDAP settings</span></h2>
       <table>
 	<tr>
-	  <td><label for="ldap_uri"/></td>
+	  <td><span translate="_">LDAP server</span></td>
 	  <td><input type="text" class="text" name="ldap_uri"/></td>
 	</tr>
 	<tr>
-	  <td><label for="ldap_basedn"/></td>
+	  <td><span translate="_">Base DN</span></td>
 	  <td><input type="text" class="text" name="ldap_basedn"/></td>
-	</tr>	
+	</tr>
       </table>
-      <input type="submit" value="Apply" class="btn"/>
+      <br/>
+      <input type="submit" value="Save settings" class="btn"/>
       &nbsp;
       <input type="reset" value="Reset" class="btn"/>
-      </fieldset>
     </form>
   </body>
 </html>

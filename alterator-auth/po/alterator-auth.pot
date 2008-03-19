@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-06-13 19:07+0400\n"
+"POT-Creation-Date: 2008-03-19 15:46+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,64 +16,50 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/auth/index.scm:50 backend3/auth:45
-msgid "Auth type"
-msgstr ""
-
-#: ui/auth/index.scm:59 backend3/auth:47
-msgid "LDAP server"
-msgstr ""
-
-#: ui/auth/index.scm:64 backend3/auth:50
-msgid "Base DN"
-msgstr ""
-
-#. zerg's spacer
-#: ui/auth/index.scm:70 ui/auth/html-messages.scm:6
-msgid "Apply"
-msgstr ""
-
-#: ui/auth/index.scm:71
-msgid "Quit"
-msgstr ""
-
-#: ui/auth/html-messages.scm:1 ui/auth/html-messages.scm:3
-#: backend3/template-auth:34
+#: ui/auth/html-messages.scm:1
 msgid "Authentication"
 msgstr ""
 
-#: ui/auth/html-messages.scm:2 ui/auth/html-messages.scm:4
-msgid "Select"
+#: ui/auth/html-messages.scm:2 ui/auth/index.scm:50 backend3/auth:41
+msgid "Auth type"
 msgstr ""
 
-#: ui/auth/html-messages.scm:5
+#: ui/auth/html-messages.scm:3 ui/auth/html-messages.scm:7
+msgid "Apply"
+msgstr ""
+
+#: ui/auth/html-messages.scm:4 ui/auth/index.scm:57
 msgid "LDAP settings"
 msgstr ""
 
-#: ui/auth/html-messages.scm:7
+#: ui/auth/html-messages.scm:5 ui/auth/index.scm:61 backend3/auth:43
+msgid "LDAP server"
+msgstr ""
+
+#: ui/auth/html-messages.scm:6 ui/auth/index.scm:66 backend3/auth:46
+msgid "Base DN"
+msgstr ""
+
+#: ui/auth/html-messages.scm:8
 msgid "Reset"
 msgstr ""
 
-#: backend3/auth:7 backend3/template-auth:8
-msgid "alterator-auth"
+#: ui/auth/index.scm:53
+msgid "Change"
 msgstr ""
 
-#: backend3/auth:12
+#: ui/auth/index.scm:75
+msgid "Save settings"
+msgstr ""
+
+#: backend3/auth:14
 msgid "local"
 msgstr ""
 
-#: backend3/auth:13
+#: backend3/auth:15
 msgid "LDAP"
 msgstr ""
 
-#: backend3/auth:49
+#: backend3/auth:45
 msgid "should be ldap://host or ldapi://host or ldaps://host"
-msgstr ""
-
-#: backend3/template-auth:35
-msgid "Authentication schema setup"
-msgstr ""
-
-#: backend3/template-auth:36
-msgid "Users"
 msgstr ""
