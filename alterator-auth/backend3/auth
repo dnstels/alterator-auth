@@ -2,7 +2,7 @@
 
 po_domain="alterator-auth"
 ldapfile="/etc/pam_ldap.conf"
-ldap_uri_re='(ldap|ldapi|ldaps)://[a-z0-9.]+'
+ldap_uri_re='^(ldap|ldapi|ldaps)://[.a-zA-Z0-9_-]+$'
 rdelim='[[:space:]]\+'
 wdelim=' '
 

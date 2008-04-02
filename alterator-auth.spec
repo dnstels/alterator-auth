@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.4
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -42,6 +42,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Apr 02 2008 Stanislav Ievlev <inger@altlinux.org> 0.4-alt2
+- fix hostname restrictions
+
 * Wed Mar 19 2008 Stanislav Ievlev <inger@altlinux.org> 0.4-alt1
 - remove template-*
 - use alterator-sh-functions
