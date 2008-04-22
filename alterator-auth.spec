@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.5
-Release: alt2
+Release: alt3
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt3
+- update help
+
 * Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt2
 - join to common translation database
 
