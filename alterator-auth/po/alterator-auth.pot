@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-19 15:46+0300\n"
+"POT-Creation-Date: 2008-04-22 14:41+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,50 +16,62 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/auth/html-messages.scm:1
-msgid "Authentication"
+#: ui/auth/index.scm:55
+msgid "Auth type:"
 msgstr ""
 
-#: ui/auth/html-messages.scm:2 ui/auth/index.scm:50 backend3/auth:41
-msgid "Auth type"
+#: ui/auth/index.scm:62
+msgid "LDAP server:"
 msgstr ""
 
-#: ui/auth/html-messages.scm:3 ui/auth/html-messages.scm:7
+#: ui/auth/index.scm:67
+msgid "Base DN:"
+msgstr ""
+
+#: ui/auth/index.scm:76
 msgid "Apply"
 msgstr ""
 
-#: ui/auth/html-messages.scm:4 ui/auth/index.scm:57
-msgid "LDAP settings"
-msgstr ""
-
-#: ui/auth/html-messages.scm:5 ui/auth/index.scm:61 backend3/auth:43
-msgid "LDAP server"
-msgstr ""
-
-#: ui/auth/html-messages.scm:6 ui/auth/index.scm:66 backend3/auth:46
-msgid "Base DN"
-msgstr ""
-
-#: ui/auth/html-messages.scm:8
+#: ui/auth/index.scm:77 стандартный ввод:8
 msgid "Reset"
 msgstr ""
 
-#: ui/auth/index.scm:53
-msgid "Change"
+#: backend3/auth:30
+msgid "Local files"
 msgstr ""
 
-#: ui/auth/index.scm:75
-msgid "Save settings"
-msgstr ""
-
-#: backend3/auth:14
-msgid "local"
-msgstr ""
-
-#: backend3/auth:15
+#: backend3/auth:33
 msgid "LDAP"
 msgstr ""
 
-#: backend3/auth:45
+#: backend3/auth:105 стандартный ввод:5
+msgid "LDAP server"
+msgstr ""
+
+#: backend3/auth:107
 msgid "should be ldap://host or ldapi://host or ldaps://host"
+msgstr ""
+
+#: стандартный ввод:1
+msgid "Authentication"
+msgstr ""
+
+#: стандартный ввод:2
+msgid "Auth type"
+msgstr ""
+
+#: стандартный ввод:3
+msgid "Change"
+msgstr ""
+
+#: стандартный ввод:4
+msgid "LDAP settings"
+msgstr ""
+
+#: стандартный ввод:6
+msgid "Base DN"
+msgstr ""
+
+#: стандартный ввод:7
+msgid "Save settings"
 msgstr ""

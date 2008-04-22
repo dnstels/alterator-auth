@@ -1,8 +1,0 @@
-(_ "Authentication")
-(_ "Auth type")
-(_ "Apply")
-(_ "LDAP settings")
-(_ "LDAP server")
-(_ "Base DN")
-(_ "Apply")
-(_ "Reset")

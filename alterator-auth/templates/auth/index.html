@@ -3,35 +3,66 @@
 <html wf="form?case-attribute=profile">
   <head>
     <title>Authentication - ALT Linux Console</title>
+    <script src="/design/scripts/auth/select.js"/>
   </head>
   <body>
     <h1><span translate="_">Authentication</span></h1>
     <form method="POST">
-      <span translate="_">Auth type</span>
-      <select name="profile" optionlist="avail_profile"/>
-      <input type="submit" value="Change" class="btn"/>
+     <table class="form-table">
+      <tr>
+       <td><span translate="_">Auth type:</span></td>
+       <td>
+        <select name="profile" optionlist="avail_profile" id="auth-select"/>
+        <input type="submit" value="Change" class="btn" id="auth-change"/>
+       </td>
+      </tr>
+     </table>
     </form>
-    <hr/>
     <form method="POST" case="local">
       <input type="hidden" name="profile"/>
+      <table class="form-table">
+        <tr>
+	  <td><span style="visibility:hidden"><span translate="_">Auth type:</span></span></td>
+          <td>&nbsp;</td>
+        </tr>
+	<tr>
+	  <td>&nbsp;</td>
+	  <td>
+    	    <input type="submit" value="Apply" class="btn"/>
+    	    &nbsp;
+    	    <input type="reset" value="Reset" class="btn"/>
+	  </td>
+        </tr>
+      </table>
     </form>
     <form method="POST" case="ldap">
       <input type="hidden" name="profile"/>
-      <h2><span translate="_">LDAP settings</span></h2>
-      <table>
+      <table class="form-table">
+        <tr>
+	  <td><span style="visibility:hidden"><span translate="_">Auth type:</span></span></td>
+          <td>&nbsp;</td>
+        </tr>
 	<tr>
-	  <td><span translate="_">LDAP server</span></td>
+	  <td><span translate="_">LDAP server:</span></td>
 	  <td><input type="text" class="text" name="ldap_uri"/></td>
 	</tr>
 	<tr>
-	  <td><span translate="_">Base DN</span></td>
+	  <td><span translate="_">Base DN:</span></td>
 	  <td><input type="text" class="text" name="ldap_basedn"/></td>
+	</tr>
+	<tr>
+	  <td colspan="2">&nbsp;</td>
+	</tr>
+	<tr>
+	  <td>&nbsp;</td>
+	  <td>
+    	    <input type="submit" value="Apply" class="btn"/>
+    	    &nbsp;
+    	    <input type="reset" value="Reset" class="btn"/>
+	  </td>
 	</tr>
       </table>
       <br/>
-      <input type="submit" value="Save settings" class="btn"/>
-      &nbsp;
-      <input type="reset" value="Reset" class="btn"/>
     </form>
   </body>
 </html>

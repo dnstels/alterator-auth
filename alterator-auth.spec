@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.4
-Release: alt2
+Version: 0.5
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -15,6 +15,9 @@ Group: System/Configuration/Other
 Requires: alterator >= 2.9 gettext
 Requires: pam-config >= 1.4.0-alt1.1
 Conflicts: alterator-fbi < 2.0-alt6
+
+Provides: alterator-nsswitch = %version
+Obsoletes: alterator-nsswitch
 
 BuildPreReq: alterator >= 3.1 alterator-fbi >= 0.16-alt2
 
@@ -36,12 +39,18 @@ alterator module for system wide auth settings
 
 %files -f %name.lang
 %_datadir/alterator/applications/*
+%_datadir/alterator/design/*/*
 %_datadir/alterator/templates/*
 %_datadir/alterator/ui/*
 %_datadir/alterator/help/*/*
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt1
+- join alterator-auth and alterator-nsswitch
+- remove html-messages.po
+- improve UI according alterator HIG
+
 * Wed Apr 02 2008 Stanislav Ievlev <inger@altlinux.org> 0.4-alt2
 - fix hostname restrictions
 

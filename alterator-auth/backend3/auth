@@ -1,10 +1,23 @@
 #!/bin/sh
 
+#common part
 po_domain="alterator-auth"
-ldapfile="/etc/pam_ldap.conf"
 ldap_uri_re='^(ldap|ldapi|ldaps)://[.a-zA-Z0-9_-]+$'
 rdelim='[[:space:]]\+'
 wdelim=' '
+
+#pam configuration
+pamldapfile="/etc/pam_ldap.conf"
+
+#nss configuration
+nssldapfile=
+nssldapfile1="/etc/nss_ldap.conf"
+nssldapfile2="/etc/nss-ldapd.conf"
+nsswitchfile="/etc/nsswitch.conf"
+
+#select between nss_ldap and nss_ldapd
+[ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
+[ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
 
 . alterator-sh-functions
 . shell-config
@@ -14,35 +27,84 @@ set -f
 
 list_profile()
 {
-    printf '("local" label "%s")' "`_ "local"`"
-    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] && printf '("ldap" label "%s")' "`_ "LDAP"`"
+    printf '("local" label "%s")' "`_ "Local files"`"
+    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
+	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
+	printf '("ldap" label "%s")' "`_ "LDAP"`"
+}
+
+read_profile()
+{
+    /usr/sbin/control system-auth
+}
+
+write_nsswitch()
+{
+    shell_config_set "$nsswitchfile" "$1:" "$2" "$rdelim" "$wdelim"
+}
+
+write_profile()
+{
+    /usr/sbin/control system-auth "$1" &&
+    case "$1" in
+	local)
+	    write_nsswitch "passwd" "files"
+	    write_nsswitch "shadow" "tcb files"
+	    write_nsswitch "group" "files"
+	    ;;
+	ldap)
+	    write_nsswitch "passwd" "files ldap"
+	    write_nsswitch "shadow" "tcb files ldap"
+	    write_nsswitch "group" "files ldap"
+	    ;;
+    esac
 }
 
 read_ldap()
 {
-    shell_config_get "$ldapfile" "$1" "$rdelim"
+    shell_config_get "$1" "$2" "$rdelim"
 }
 
 write_ldap()
 {
-    shell_config_set "$ldapfile" "$1" "$2" "$rdelim" "$wdelim"
+    shell_config_set "$1" "$2" "$3" "$rdelim" "$wdelim"
 }
 
+#syncronyous config change
+read_ldap2()
+{
+    read_ldap "$pamldapfile" "$1"
+}
 
-#comment host option to avoid conflict with uri
-sed -r 's,^(host[[:space:]]),#\1,' -i "$ldapfile"
+write_ldap2()
+{
+    write_ldap "$pamldapfile" "$1" "$2" && write_ldap "$nssldapfile" "$1" "$2"
+}
+
+del_ldap()
+{
+    shell_config_del "$1" "$2" "$rdelim"
+}
+
+del_ldap2()
+{
+    del_ldap "$pamldapfile" "$1" && del_ldap "$nssldapfile" "$1"
+}
+
+#initial settings
+del_ldap2 host
+[ ! -s "$nssldapfile1" ] || write_ldap "$nssldapfile1" bind_policy soft
+[ ! -s "$nssldapfile1" ] || write_ldap "$nssldapfile1" bind_timelimit 30
 
 on_message()
 {
 	case "$in_action" in
 	    constraints)
 		echo '('
-		printf 'profile (label "%s")' "`_ "Auth type"`"
 		printf 'ldap_uri (label "%s" match ("%s" "%s"))' \
 		    "`_ "LDAP server"`" \
 		    "$ldap_uri_re" \
 		    "`_ "should be ldap://host or ldapi://host or ldaps://host"`"
-		printf 'ldap_basedn (label "%s")' "`_ "Base DN"`"
 		echo ')'
 		;;
 	    list)
@@ -52,17 +114,16 @@ on_message()
 		;;
 	    read)
 		echo '('
-		local profile="$(/usr/sbin/control system-auth)"
 
-		printf 'profile "%s"' "$profile"
-		printf 'ldap_uri "%s"\n' "$(read_ldap uri)"
-		printf 'ldap_basedn "%s"\n' "$(read_ldap base)"
+		printf 'profile "%s"' "$(read_profile)"
+		printf 'ldap_uri "%s"\n' "$(read_ldap2 uri)"
+		printf 'ldap_basedn "%s"\n' "$(read_ldap2 base)"
 		echo ')'
 		;;
 	    write)
-		[ -n "$in_profile" ] && /usr/sbin/control system-auth "$in_profile"
-	        [ -n "$in_ldap_uri" ] && write_ldap uri "$in_ldap_uri"
-	        [ -n "$in_ldap_basedn" ] && write_ldap base "$in_ldap_basedn"
+		[ -n "$in_profile" ] && write_profile "$in_profile" 
+	        [ -n "$in_ldap_uri" ] && write_ldap2 uri "$in_ldap_uri"
+	        [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
 	        write_nop
 		;;
 	    *)
