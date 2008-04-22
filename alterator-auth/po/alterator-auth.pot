@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-22 14:41+0400\n"
+"POT-Creation-Date: 2008-04-22 15:59+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,23 +16,26 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ui/auth/index.scm:55
+#: ui/auth/index.scm:55 стандартный ввод:2
+#: стандартный ввод:4 стандартный ввод:7
 msgid "Auth type:"
 msgstr ""
 
-#: ui/auth/index.scm:62
+#: ui/auth/index.scm:62 стандартный ввод:8
 msgid "LDAP server:"
 msgstr ""
 
-#: ui/auth/index.scm:67
+#: ui/auth/index.scm:67 стандартный ввод:9
 msgid "Base DN:"
 msgstr ""
 
-#: ui/auth/index.scm:76
+#: ui/auth/index.scm:76 стандартный ввод:5
+#: стандартный ввод:10
 msgid "Apply"
 msgstr ""
 
-#: ui/auth/index.scm:77 стандартный ввод:8
+#: ui/auth/index.scm:77 стандартный ввод:6
+#: стандартный ввод:11
 msgid "Reset"
 msgstr ""
 
@@ -44,7 +47,7 @@ msgstr ""
 msgid "LDAP"
 msgstr ""
 
-#: backend3/auth:105 стандартный ввод:5
+#: backend3/auth:105
 msgid "LDAP server"
 msgstr ""
 
@@ -56,22 +59,6 @@ msgstr ""
 msgid "Authentication"
 msgstr ""
 
-#: стандартный ввод:2
-msgid "Auth type"
-msgstr ""
-
 #: стандартный ввод:3
 msgid "Change"
-msgstr ""
-
-#: стандартный ввод:4
-msgid "LDAP settings"
-msgstr ""
-
-#: стандартный ввод:6
-msgid "Base DN"
-msgstr ""
-
-#: стандартный ввод:7
-msgid "Save settings"
 msgstr ""

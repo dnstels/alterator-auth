@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.5
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -19,7 +19,7 @@ Conflicts: alterator-fbi < 2.0-alt6
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 3.1 alterator-fbi >= 0.16-alt2
+BuildPreReq: alterator >= 3.1 alterator-fbi >= 0.16-alt2, alterator-l10n
 
 # Automatically added by buildreq on Mon Jul 11 2005 (-bi)
 BuildRequires: alterator
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt2
+- join to common translation database
+
 * Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt1
 - join alterator-auth and alterator-nsswitch
 - remove html-messages.po
