@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.5
-Release: alt3
+Release: alt4
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -14,7 +14,7 @@ License: GPL
 Group: System/Configuration/Other
 Requires: alterator >= 2.9 gettext
 Requires: pam-config >= 1.4.0-alt1.1
-Conflicts: alterator-fbi < 2.0-alt6
+Conflicts: alterator-fbi < 2.2-alt5
 
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Apr 29 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt4
+- update for new case-form algo
+
 * Tue Apr 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt3
 - update help
 

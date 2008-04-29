@@ -8,35 +8,16 @@
   <body>
     <h1><span translate="_">Authentication</span></h1>
     <form method="POST">
-     <table class="form-table">
-      <tr>
-       <td><span translate="_">Auth type:</span></td>
-       <td>
-        <select name="profile" optionlist="avail_profile" id="auth-select"/>
-        <input type="submit" value="Change" class="btn" id="auth-change"/>
-       </td>
-      </tr>
-     </table>
-    </form>
-    <form method="POST" case="local">
-      <input type="hidden" name="profile"/>
       <table class="form-table">
         <tr>
-	  <td><span style="visibility:hidden"><span translate="_">Auth type:</span></span></td>
-          <td>&nbsp;</td>
-        </tr>
-	<tr>
-	  <td>&nbsp;</td>
-	  <td>
-    	    <input type="submit" value="Apply" class="btn"/>
-    	    &nbsp;
-    	    <input type="reset" value="Reset" class="btn"/>
-	  </td>
+	  <td><span translate="_">Auth type:</span></td>
+          <td>
+	    <select name="profile" optionlist="avail_profile" id="auth-select"/>
+	    <input type="submit" value="Change" class="btn" id="auth-change"/>
+          </td>
         </tr>
       </table>
-    </form>
-    <form method="POST" case="ldap">
-      <input type="hidden" name="profile"/>
+      <div case="ldap">
       <table class="form-table">
         <tr>
 	  <td><span style="visibility:hidden"><span translate="_">Auth type:</span></span></td>
@@ -53,15 +34,10 @@
 	<tr>
 	  <td colspan="2">&nbsp;</td>
 	</tr>
-	<tr>
-	  <td>&nbsp;</td>
-	  <td>
-    	    <input type="submit" value="Apply" class="btn"/>
-    	    &nbsp;
-    	    <input type="reset" value="Reset" class="btn"/>
-	  </td>
-	</tr>
       </table>
+      </div>
+      <input type="submit" value="Apply" class="btn"/>&nbsp;
+      <input type="submit" value="Reset" class="btn"/>
       <br/>
     </form>
   </body>
