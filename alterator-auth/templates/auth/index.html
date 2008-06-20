@@ -1,43 +1,43 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <!-- authentication administration module -->
-<html wf="form?case-attribute=profile">
+<html wf="form">
   <head>
     <title>Authentication - ALT Linux Console</title>
-    <script src="/design/scripts/auth/select.js"/>
+    <script>
+	effectShow("ldap_uri","profile","ldap");
+	effectShow("ldap_basedn", "profile", "ldap");
+    </script>
   </head>
   <body>
     <h1><span translate="_">Authentication</span></h1>
+    <br/>
     <form method="POST">
       <table class="form-table">
         <tr>
 	  <td><span translate="_">Auth type:</span></td>
           <td>
 	    <select name="profile" optionlist="avail_profile" id="auth-select"/>
-	    <input type="submit" value="Change" class="btn" id="auth-change"/>
-          </td>
-        </tr>
-      </table>
-      <div case="ldap">
-      <table class="form-table">
-        <tr>
-	  <td><span style="visibility:hidden"><span translate="_">Auth type:</span></span></td>
-          <td>&nbsp;</td>
-        </tr>
-	<tr>
-	  <td><span translate="_">LDAP server:</span></td>
-	  <td><input type="text" class="text" name="ldap_uri"/></td>
+	  </td>
 	</tr>
 	<tr>
-	  <td><span translate="_">Base DN:</span></td>
-	  <td><input type="text" class="text" name="ldap_basedn"/></td>
+	  <td><span style="display:none" translate="_" name="ldap_uri">LDAP server:</span></td>
+	  <td><input style="display:none" type="text" class="text" name="ldap_uri"/></td>
+	</tr>
+	<tr>
+	  <td><span style="display:none" translate="_" name="ldap_basedn">Base DN:</span></td>
+	  <td><input style="display:none" type="text" class="text" name="ldap_basedn"/></td>
 	</tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>
 	</tr>
+	<tr>
+	    <td>&nbsp;</td>
+	    <td>
+		<input type="submit" value="Apply" class="btn"/>&nbsp;
+		<input type="reset" value="Reset" class="btn"/>
+	    </td>
+	</tr>
       </table>
-      </div>
-      <input type="submit" value="Apply" class="btn"/>&nbsp;
-      <input type="submit" value="Reset" class="btn"/>
       <br/>
     </form>
   </body>

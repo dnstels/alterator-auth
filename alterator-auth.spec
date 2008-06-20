@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.5
-Release: alt4
+Version: 0.6
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -14,7 +14,8 @@ License: GPL
 Group: System/Configuration/Other
 Requires: alterator >= 2.9 gettext
 Requires: pam-config >= 1.4.0-alt1.1
-Conflicts: alterator-fbi < 2.2-alt5
+Conflicts: alterator-fbi < 2.6-alt8
+Conflicts: alterator-lookout < 1.1-alt8
 
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
@@ -39,13 +40,16 @@ alterator module for system wide auth settings
 
 %files -f %name.lang
 %_datadir/alterator/applications/*
-%_datadir/alterator/design/*/*
 %_datadir/alterator/templates/*
 %_datadir/alterator/ui/*
 %_datadir/alterator/help/*/*
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Jun 20 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt1
+- use effectShow
+- update backend
+
 * Tue Apr 29 2008 Stanislav Ievlev <inger@altlinux.org> 0.5-alt4
 - update for new case-form algo
 

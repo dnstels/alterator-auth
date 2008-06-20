@@ -27,10 +27,10 @@ set -f
 
 list_profile()
 {
-    printf '("local" label "%s")' "`_ "Local files"`"
+    write_enum_item "local" "`_ "Local files"`"
     [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
-	printf '("ldap" label "%s")' "`_ "LDAP"`"
+	write_enum_item "ldap" "`_ "LDAP"`"
 }
 
 read_profile()
@@ -115,9 +115,9 @@ on_message()
 	    read)
 		echo '('
 
-		printf 'profile "%s"' "$(read_profile)"
-		printf 'ldap_uri "%s"\n' "$(read_ldap2 uri)"
-		printf 'ldap_basedn "%s"\n' "$(read_ldap2 base)"
+		write_string_param profile "$(read_profile)"
+		write_string_param ldap_uri "$(read_ldap2 uri)"
+		write_string_param ldap_basedn "$(read_ldap2 base)"
 		echo ')'
 		;;
 	    write)
