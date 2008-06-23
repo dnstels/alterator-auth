@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.6
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -14,8 +14,8 @@ License: GPL
 Group: System/Configuration/Other
 Requires: alterator >= 2.9 gettext
 Requires: pam-config >= 1.4.0-alt1.1
-Conflicts: alterator-fbi < 2.6-alt8
-Conflicts: alterator-lookout < 1.1-alt8
+Conflicts: alterator-fbi < 2.6-alt9
+Conflicts: alterator-lookout < 1.1-alt9
 
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt2
+- rename: effect-update -> update-effect, effect-init -> init-effect
+
 * Fri Jun 20 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt1
 - use effectShow
 - update backend

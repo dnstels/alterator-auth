@@ -48,7 +48,7 @@
   (spacer)
   (hbox align "left"
 	(button text (_ "Apply") (when clicked (write-profile)))
-	(button text (_ "Reset") (when clicked (read-profile) (effect-update))))
+	(button text (_ "Reset") (when clicked (read-profile) (update-effect))))
   (spacer))
 
 ;;; Logic
@@ -58,4 +58,4 @@
 
 (document:root
   (when loaded
-    (and (read-profile) (effect-init))))
+    (and (read-profile) (init-effect))))
