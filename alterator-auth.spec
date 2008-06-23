@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.6
-Release: alt3
+Release: alt4
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt4
+- use enumref
+
 * Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt3
 - remove po-files
 - use module.mak
