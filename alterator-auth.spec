@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.6
-Release: alt2
+Release: alt3
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -46,6 +46,10 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt3
+- remove po-files
+- use module.mak
+
 * Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt2
 - rename: effect-update -> update-effect, effect-init -> init-effect
 
