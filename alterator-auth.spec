@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.6
-Release: alt4
+Version: 0.7
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -12,15 +12,15 @@ Source:%name-%version.tar
 Summary: alterator module for system wide auth settings
 License: GPL
 Group: System/Configuration/Other
-Requires: alterator >= 2.9 gettext
+Requires: alterator >= 4.0-alt11 gettext
 Requires: pam-config >= 1.4.0-alt1.1
-Conflicts: alterator-fbi < 2.6-alt9
-Conflicts: alterator-lookout < 1.1-alt9
+Conflicts: alterator-fbi < 5.1-alt2
+Conflicts: alterator-lookout < 1.3-alt3
 
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 3.1 alterator-fbi >= 0.16-alt2, alterator-l10n
+BuildPreReq: alterator >= 4.0-alt11 alterator-fbi >= 5.1-alt2, alterator-l10n >= 0.9-alt9
 
 # Automatically added by buildreq on Mon Jul 11 2005 (-bi)
 BuildRequires: alterator
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Mon Sep 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.7-alt1
+- replace constraints with types
+
 * Mon Jun 23 2008 Stanislav Ievlev <inger@altlinux.org> 0.6-alt4
 - use enumref
 
