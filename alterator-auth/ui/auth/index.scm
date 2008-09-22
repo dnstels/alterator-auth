@@ -5,55 +5,60 @@
 
 ;;; Functions
 (define (read-profile)
-  (woo-catch/message
-    (thunk
+  (catch/message
+    (lambda()
       (profile-id enumref "/auth/avail_profile")
       (let ((data (woo-read-first "/auth")))
-	(ldap-uri value (woo-get-option data 'ldap_uri))
+	(ldap-host value (woo-get-option data 'ldap_host))
+	(ldap-port value (woo-get-option data 'ldap_port))
+	(ldap-ssl value (woo-get-option data 'ldap_ssl))
 	(ldap-basedn value (woo-get-option data 'ldap_basedn))
 	(profile-id value (woo-get-option data 'profile))))))
 
 (define (write-profile)
-  (woo-catch/message
-    (thunk
-      (woo-write/constraints "/auth"
-			     'profile (profile-id value)
-			     'ldap_uri (ldap-uri value)
-			     'ldap_basedn (ldap-basedn value)))))
+  (catch/message
+    (lambda()
+      (woo-write "/auth"
+		 'profile (profile-id value)
+		 'ldap_host (ldap-host value)
+		 'ldap_port (ldap-port value)
+		 'ldap_ssl (ldap-ssl value)
+		 'ldap_basedn (ldap-basedn value)))))
 
 ;;; UI
 (gridbox
-  columns "10;0;80;10"
+  columns "0;100"
+  margin 50
 
-  (spacer)
   (label text (_ "Auth type:") align "right")
   (document:id profile-id (combobox name "profile"))
-  (spacer)
 
-  (label colspan 4)
+  (label colspan 2)
 
-  (spacer)
-  (document:id ldap-uri-label (label text (_ "LDAP server:") align "right" name "ldap_uri" visibility #f))
-  (document:id ldap-uri (edit name "ldap_uri" visibility #f))
-  (spacer)
+  (label text (_ "LDAP server:") align "right" name "ldap_host" visibility #f)
+  (document:id ldap-host (edit name "ldap_host" visibility #f))
 
-  (spacer)
   (document:id ldap-basedn-label (label text (_ "Base DN:") align "right" name "ldap_basedn" visibility #f))
   (document:id ldap-basedn (edit name "ldap_basedn" visibility #f))
+
+  (label text (_ "Port (optional):") align "right" name "ldap_port" visibility #f)
+  (document:id ldap-port (edit name "ldap_port" visibility #f))
+
   (spacer)
+  (document:id ldap-ssl (checkbox  text (_ "Enable TLS/SSL") name "ldap_ssl" visibility #f))
 
   (label colspan 4)
 
-  (spacer)
   (spacer)
   (hbox align "left"
 	(button text (_ "Apply") (when clicked (write-profile)))
-	(button text (_ "Reset") (when clicked (read-profile) (update-effect))))
-  (spacer))
+	(button text (_ "Reset") (when clicked (read-profile) (update-effect)))))
 
 ;;; Logic
 
-(effect-show "ldap_uri" "profile" "ldap")
+(effect-show "ldap_host" "profile" "ldap")
+(effect-show "ldap_port" "profile" "ldap")
+(effect-show "ldap_ssl" "profile" "ldap")
 (effect-show "ldap_basedn" "profile" "ldap")
 
 (document:root

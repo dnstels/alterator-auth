@@ -4,7 +4,9 @@
   <head>
     <title>Authentication - ALT Linux Console</title>
     <script>
-	effectShow("ldap_uri","profile","ldap");
+	effectShow("ldap_host","profile","ldap");
+	effectShow("ldap_port","profile","ldap");
+	effectShow("ldap_ssl","profile","ldap");
 	effectShow("ldap_basedn", "profile", "ldap");
     </script>
   </head>
@@ -20,12 +22,23 @@
 	  </td>
 	</tr>
 	<tr>
-	  <td><span style="display:none" translate="_" name="ldap_uri">LDAP server:</span></td>
-	  <td><input style="display:none" type="text" class="text" name="ldap_uri"/></td>
+	    <td colspan="2">&nbsp;</td>
+	</tr>
+	<tr>
+	  <td><span style="display:none" translate="_" name="ldap_host">LDAP server:</span></td>
+	  <td><input style="display:none" type="text" class="text" name="ldap_host"/></td>
 	</tr>
 	<tr>
 	  <td><span style="display:none" translate="_" name="ldap_basedn">Base DN:</span></td>
 	  <td><input style="display:none" type="text" class="text" name="ldap_basedn"/></td>
+	</tr>
+	<tr>
+	  <td><span style="display:none" translate="_" name="ldap_port">Port (optional):</span></td>
+	  <td><input style="display:none" type="text" class="text" name="ldap_port"/></td>
+	</tr>
+	<tr>
+	  <td>&nbsp;</td>
+	  <td><input style="display:none" type="checkbox" name="ldap_ssl"/><span style="display:none" name="ldap_ssl">Enable TLS/SSL</span></td>
 	</tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>

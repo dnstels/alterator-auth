@@ -99,12 +99,10 @@ del_ldap2 host
 on_message()
 {
 	case "$in_action" in
-	    constraints)
+	    type)
 		echo '('
-		printf 'ldap_uri (label "%s" match ("%s" "%s"))' \
-		    "`_ "LDAP server"`" \
-		    "$ldap_uri_re" \
-		    "`_ "should be ldap://host or ldapi://host or ldaps://host"`"
+		write_type_item ldap_host hostname
+		write_type_item ldap_port tcp-port
 		echo ')'
 		;;
 	    list)
@@ -116,13 +114,37 @@ on_message()
 		echo '('
 
 		write_string_param profile "$(read_profile)"
-		write_string_param ldap_uri "$(read_ldap2 uri)"
+
+		local ldap_uri="$(read_ldap2 uri)"
+
+		local ldap_proto="${ldap_uri%%://*}"
+		local ldap_host="${ldap_uri#$ldap_proto://}"
+		local ldap_port="${ldap_host##*:}"
+
+		ldap_host="${ldap_host%%:*}"
+		[ "$ldap_port" != "$ldap_host" ] || ldap_port=
+
+		write_string_param ldap_host "$ldap_host"
+		write_string_param ldap_port "$ldap_port"
+
+		[ "$ldap_proto" != "ldaps" ]
+		write_bool_param ldap_ssl "$?"
+
 		write_string_param ldap_basedn "$(read_ldap2 base)"
 		echo ')'
 		;;
 	    write)
+		if [ -n "$in_ldap_host" ];then
+		    local uri="ldap://"
+		    test_bool "$in_ldap_ssl" && uri="ldaps://"
+
+		    uri="$uri$in_ldap_host"
+		    [ -n "$in_ldap_port" ] && uri="$uri:$in_ldap_port"
+
+		    write_ldap2 uri "$uri"
+		fi
+
 		[ -n "$in_profile" ] && write_profile "$in_profile" 
-	        [ -n "$in_ldap_uri" ] && write_ldap2 uri "$in_ldap_uri"
 	        [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
 	        write_nop
 		;;
