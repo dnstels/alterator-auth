@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.7
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Nov 07 2008 Vladislav Zavjalov <slazav@altlinux.org> 0.7-alt2
+- remove title and h1 from html template
+
 * Mon Sep 22 2008 Stanislav Ievlev <inger@altlinux.org> 0.7-alt1
 - replace constraints with types
 
