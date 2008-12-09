@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.7
-Release: alt3
+Release: alt4
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -46,6 +46,9 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Tue Dec 09 2008 Vladislav Zavjalov <slazav@altlinux.org> 0.7-alt4
+- use new help from l10n
+
 * Fri Dec 05 2008 Vladislav Zavjalov <slazav@altlinux.org> 0.7-alt3
 - update help (by azol@), rebuild with new alterator-l10n (add pt_BR.po)
 
