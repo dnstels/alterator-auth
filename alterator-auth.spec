@@ -1,8 +1,8 @@
 %define _altdata_dir %_datadir/alterator
 
 Name: alterator-auth
-Version: 0.7
-Release: alt4
+Version: 0.8
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -12,19 +12,16 @@ Source:%name-%version.tar
 Summary: alterator module for system wide auth settings
 License: GPL
 Group: System/Configuration/Other
-Requires: alterator >= 4.0-alt11
-Requires: alterator-l10n
+Requires: alterator >= 4.7-alt4
+Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.4.0-alt1.1
-Conflicts: alterator-fbi < 5.1-alt2
-Conflicts: alterator-lookout < 1.3-alt3
+Conflicts: alterator-fbi < 5.9-alt2
+Conflicts: alterator-lookout < 1.6-alt6
 
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 4.0-alt11
-
-# Automatically added by buildreq on Mon Jul 11 2005 (-bi)
-BuildRequires: alterator
+BuildPreReq: alterator >= 4.7-alt4
 
 %description
 alterator module for system wide auth settings
@@ -44,6 +41,10 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Feb 27 2009 Stanislav Ievlev <inger@altlinux.org> 0.8-alt1
+- move html ui definitions from templates to ui directory
+- use help and translations directly from alterator-l10n
+
 * Tue Dec 09 2008 Vladislav Zavjalov <slazav@altlinux.org> 0.7-alt4
 - use new help from l10n
 
