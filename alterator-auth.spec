@@ -40,7 +40,6 @@ alterator module for system wide auth settings
 
 %files
 %_datadir/alterator/applications/*
-%_datadir/alterator/templates/*
 %_datadir/alterator/ui/*
 %_alterator_backend3dir/*
 
