@@ -12,7 +12,8 @@ Source:%name-%version.tar
 Summary: alterator module for system wide auth settings
 License: GPL
 Group: System/Configuration/Other
-Requires: alterator >= 4.0-alt11 gettext
+Requires: alterator >= 4.0-alt11
+Requires: alterator-l10n
 Requires: pam-config >= 1.4.0-alt1.1
 Conflicts: alterator-fbi < 5.1-alt2
 Conflicts: alterator-lookout < 1.3-alt3
@@ -20,7 +21,7 @@ Conflicts: alterator-lookout < 1.3-alt3
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 4.0-alt11 alterator-fbi >= 5.1-alt2, alterator-l10n >= 0.9-alt9
+BuildPreReq: alterator >= 4.0-alt11
 
 # Automatically added by buildreq on Mon Jul 11 2005 (-bi)
 BuildRequires: alterator
@@ -36,13 +37,11 @@ alterator module for system wide auth settings
 
 %install
 %makeinstall
-%find_lang %name
 
-%files -f %name.lang
+%files
 %_datadir/alterator/applications/*
 %_datadir/alterator/templates/*
 %_datadir/alterator/ui/*
-%_datadir/alterator/help/*/*
 %_alterator_backend3dir/*
 
 %changelog
