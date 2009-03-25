@@ -7,3 +7,5 @@ Name=Authentication
 X-Alterator-URI=/auth
 X-Alterator-Weight=20
 X-Alterator-Help=auth
+Name[ru]=Аутентификация
+Name[uk]=Аутентифікація

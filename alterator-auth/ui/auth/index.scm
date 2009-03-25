@@ -1,8 +1,6 @@
 (document:surround "/std/base")
 (document:insert "/std/functions")
 
-(document:envelop with-translation _ "alterator-auth")
-
 ;;; Functions
 (define (read-profile)
   (catch/message
