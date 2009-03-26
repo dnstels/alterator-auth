@@ -15,10 +15,6 @@ nssldapfile1="/etc/nss_ldap.conf"
 nssldapfile2="/etc/nss-ldapd.conf"
 nsswitchfile="/etc/nsswitch.conf"
 
-# proxyuser part
-ldap_proxyuser_enable="enable"
-ldap_proxyuser_pass_file="/etc/openldap/proxyuser.pass"
-
 #select between nss_ldap and nss_ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
@@ -150,14 +146,7 @@ on_message()
 
 		[ -n "$in_profile" ] && write_profile "$in_profile" 
 		
-		if [ -n "$in_ldap_basedn" ]; then
-			write_ldap2 base "$in_ldap_basedn"
-			if [ -n "$ldap_proxyuser_enable" -a -f "$ldap_proxyuser_pass_file" ]; then
-				local proxyuser_pass = $(read_proxyuser_pass "$ldap_proxyuser_pass_file")
-				local binddn = "cn=proxyuser,$in_ldap_basedn"
-				write_ldap2 binddn "$binddn"
-				write_ldap2 bindpw "$proxyuser_pass"
-			fi
+        [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
 
 		fi
 	        write_nop
