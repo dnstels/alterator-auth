@@ -2,6 +2,7 @@
 
 #common part
 po_domain="alterator-auth"
+alterator_api_version=1
 ldap_uri_re='^(ldap|ldapi|ldaps)://[.a-zA-Z0-9_-]+$'
 rdelim='[[:space:]]\+'
 wdelim=' '
@@ -100,18 +101,13 @@ on_message()
 {
 	case "$in_action" in
 	    type)
-		echo '('
 		write_type_item ldap_host hostname
 		write_type_item ldap_port tcp-port
-		echo ')'
 		;;
 	    list)
-		echo '('
 		[ "$in__objects" = "avail_profile" ] && list_profile
-		echo ')'
 		;;
 	    read)
-		echo '('
 
 		write_string_param profile "$(read_profile)"
 
@@ -131,7 +127,6 @@ on_message()
 		write_bool_param ldap_ssl "$?"
 
 		write_string_param ldap_basedn "$(read_ldap2 base)"
-		echo ')'
 		;;
 	    write)
 		if [ -n "$in_ldap_host" ];then
@@ -149,9 +144,6 @@ on_message()
         [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
 	        
          write_nop
-		;;
-	    *)
-		echo '#f'
 		;;
 	esac
 }
