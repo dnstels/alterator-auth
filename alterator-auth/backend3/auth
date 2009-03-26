@@ -147,9 +147,8 @@ on_message()
 		[ -n "$in_profile" ] && write_profile "$in_profile" 
 		
         [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
-
-		fi
-	        write_nop
+	        
+         write_nop
 		;;
 	    *)
 		echo '#f'
