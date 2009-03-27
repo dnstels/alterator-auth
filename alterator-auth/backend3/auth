@@ -1,7 +1,5 @@
 #!/bin/sh
 
-. alterator-kdc-functions
-
 #common part
 po_domain="alterator-auth"
 alterator_api_version=1
@@ -17,6 +15,9 @@ nssldapfile=
 nssldapfile1="/etc/nss_ldap.conf"
 nssldapfile2="/etc/nss-ldapd.conf"
 nsswitchfile="/etc/nsswitch.conf"
+
+# krb conf
+krb5_conf=/etc/krb5.conf
 
 #select between nss_ldap and nss_ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
@@ -34,6 +35,10 @@ list_profile()
     [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
 	write_enum_item "ldap" "`_ "LDAP"`"
+    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
+	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
+	[ -n "$(find /$(getconf SLIB) -name 'libkrb5.so.*')" ] &&
+	write_enum_item "krb5" "`_ "LDAP and Kerberos"`"
 }
 
 read_profile()
@@ -60,6 +65,11 @@ write_profile()
 	    write_nsswitch "shadow" "tcb files ldap"
 	    write_nsswitch "group" "files ldap"
 	    ;;
+	krb5)
+	    write_nsswitch "passwd" "files ldap"
+	    write_nsswitch "shadow" "tcb files ldap"
+	    write_nsswitch "group" "files ldap"
+	    ;;
     esac
 }
 
@@ -69,11 +79,43 @@ write_krb5()
 
     if [ -n "$(echo "$host"|egrep -i "^[a-z]")" ] ;then
 
-    DOMAINNAME="${host#*.}"
-    kdc_uses_ldap=0
-    fill_krb_conf > "$krb5_conf"
+        fill_krb_conf "${host#*.}" > "$krb5_conf"
 
     fi
+}
+
+fill_krb_conf()
+{
+    local domain="$1"
+    local realm="$(echo "$domain"|tr '[[:lower:]]' '[[:upper:]]')"
+
+cat << E_O_F
+[logging]
+default = FILE:/var/log/krb5libs.log
+
+[libdefaults]
+default_realm = $realm
+dns_lookup_realm = true
+dns_lookup_kdc = true
+
+[domain_realm]
+.$domain = $realm
+$domain = $realm
+
+[realms]
+$realm = {
+  kdc = kdc.$domain:88
+  admin_server = kdc.$domain:749
+  default_domain = $domain
+ }
+
+[pam]
+ debug = false
+ ticket_lifetime = 36000
+ renew_lifetime = 36000
+ forwardable = true
+ krb4_convert = false
+E_O_F
 }
 
 read_ldap()

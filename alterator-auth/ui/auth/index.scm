@@ -55,9 +55,13 @@
 ;;; Logic
 
 (effect-show "ldap_host" "profile" "ldap")
+(effect-show "ldap_host" "profile" "krb5")
 (effect-show "ldap_port" "profile" "ldap")
+(effect-show "ldap_port" "profile" "krb5")
 (effect-show "ldap_ssl" "profile" "ldap")
+(effect-show "ldap_ssl" "profile" "krb5")
 (effect-show "ldap_basedn" "profile" "ldap")
+(effect-show "ldap_basedn" "profile" "krb5")
 
 (document:root
   (when loaded

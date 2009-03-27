@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.8
-Release: alt2
+Release: alt2.5
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -15,7 +15,6 @@ Group: System/Configuration/Other
 Requires: alterator >= 4.7-alt4
 Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.4.0-alt1.1
-Requires: alterator-kdc
 Conflicts: alterator-fbi < 5.9-alt2
 Conflicts: alterator-lookout < 1.6-alt6
 
@@ -42,6 +41,11 @@ alterator module for system wide auth settings
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Mar 27 2009 Lebedev Sergey <barabashka@altlinux.org> 0.8-alt2.5
+- removed alterator-kdc
+- wrote fill_krb_conf
+- fixed ui
+
 * Thu Mar 26 2009 Lebedev Sergey <barabashka@altlinux.org> 0.8-alt2
 - added krb5 support (krb5.conf)
 - require alterator-kdc
