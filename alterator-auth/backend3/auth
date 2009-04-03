@@ -7,201 +7,80 @@ ldap_uri_re='^(ldap|ldapi|ldaps)://[.a-zA-Z0-9_-]+$'
 rdelim='[[:space:]]\+'
 wdelim=' '
 
-#pam configuration
-pamldapfile="/etc/pam_ldap.conf"
-
-#nss configuration
-nssldapfile=
-nssldapfile1="/etc/nss_ldap.conf"
-nssldapfile2="/etc/nss-ldapd.conf"
-nsswitchfile="/etc/nsswitch.conf"
-
-# krb conf
-krb5_conf=/etc/krb5.conf
-
-#select between nss_ldap and nss_ldapd
-[ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
-[ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
-
 . alterator-sh-functions
 . shell-config
+. shell-quote
 
 #turn off auto expansion
 set -f
 
-list_profile()
+host_2_dn()
 {
-    write_enum_item "local" "`_ "Local files"`"
-    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
-	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
-	write_enum_item "ldap" "`_ "LDAP"`"
-    [ -n "$(find /$(getconf SLIB)/security -name 'pam_ldap.*')" ] &&
-	[ -n "$(find /$(getconf SLIB) -name 'libnss_ldap.so.*')" ] &&
-	[ -n "$(find /$(getconf SLIB) -name 'libkrb5.so.*')" ] &&
-	write_enum_item "krb5" "`_ "LDAP and Kerberos"`"
+    local host="$1" ; shift
+    host="$(echo $host|sed -e "s/^/dc=/"|sed -e "s/\./,dc=/g")"
+    echo "$host"
 }
 
-read_profile()
+list_domain()
 {
-    /usr/sbin/control system-auth
+	local __ prefix ip txt role domain
+
+	avahi-browse -prtk _server._tcp 2>/dev/null|
+		while IFS=';' read prefix __ __ __ __ __ __ ip __ txt; do
+			[ "$prefix" = "=" ] || continue
+			role="$(txt_record role "$txt")"
+			[ "$role" = "master" ] || continue
+			domain="$(txt_record domain "$txt")"
+            write_enum_item "$domain" "$domain"
+		done
 }
 
-write_nsswitch()
+txt_record()
 {
-    shell_config_set "$nsswitchfile" "$1:" "$2" "$rdelim" "$wdelim"
+	echo "$2" |
+		sed -n "s/\(^\|.*[[:space:]]\)\"$(quote_sed_regexp "$1")=\([^\"]*\)\".*/\2/p"
 }
 
-write_profile()
+dn_2_host()
 {
-    /usr/sbin/control system-auth "$1" &&
-    case "$1" in
-	local)
-	    write_nsswitch "passwd" "files"
-	    write_nsswitch "shadow" "tcb files"
-	    write_nsswitch "group" "files"
-	    ;;
-	ldap)
-	    write_nsswitch "passwd" "files ldap"
-	    write_nsswitch "shadow" "tcb files ldap"
-	    write_nsswitch "group" "files ldap"
-	    ;;
-	krb5)
-	    write_nsswitch "passwd" "files ldap"
-	    write_nsswitch "shadow" "tcb files ldap"
-	    write_nsswitch "group" "files ldap"
-	    ;;
-    esac
+    local dn="$1"
+    local host=
+
+    echo "$dn"|sed -e 's/^dc=//i'|sed -e 's/,dc=/\./g'
 }
 
-write_krb5()
+read_current()
 {
-    local host="$1"
+    local data="$(/usr/sbin/system-auth status)"
+    local status="$(echo "$data"|cut -f1 -d' ')"
+    local dn
 
-    if [ -n "$(echo "$host"|egrep -i "^[a-z]")" ] ;then
+    [ "$status" = "krb5" ] && dn="$(echo "$data"|cut -f2 -d' ')" &&  dn_2_host "$dn" && return
 
-        fill_krb_conf "${host#*.}" > "$krb5_conf"
-
-    fi
+    echo "not set"
 }
-
-fill_krb_conf()
-{
-    local domain="$1"
-    local realm="$(echo "$domain"|tr '[[:lower:]]' '[[:upper:]]')"
-
-cat << E_O_F
-[logging]
-default = FILE:/var/log/krb5libs.log
-
-[libdefaults]
-default_realm = $realm
-dns_lookup_realm = true
-dns_lookup_kdc = true
-
-[domain_realm]
-.$domain = $realm
-$domain = $realm
-
-[realms]
-$realm = {
-  kdc = kdc.$domain:88
-  admin_server = kdc.$domain:749
-  default_domain = $domain
- }
-
-[pam]
- debug = false
- ticket_lifetime = 36000
- renew_lifetime = 36000
- forwardable = true
- krb4_convert = false
-E_O_F
-}
-
-read_ldap()
-{
-    shell_config_get "$1" "$2" "$rdelim"
-}
-
-write_ldap()
-{
-    shell_config_set "$1" "$2" "$3" "$rdelim" "$wdelim"
-}
-
-#syncronyous config change
-read_ldap2()
-{
-    read_ldap "$pamldapfile" "$1"
-}
-
-write_ldap2()
-{
-    write_ldap "$pamldapfile" "$1" "$2" && write_ldap "$nssldapfile" "$1" "$2"
-}
-
-del_ldap()
-{
-    shell_config_del "$1" "$2" "$rdelim"
-}
-
-del_ldap2()
-{
-    del_ldap "$pamldapfile" "$1" && del_ldap "$nssldapfile" "$1"
-}
-
-#initial settings
-del_ldap2 host
-[ ! -s "$nssldapfile1" ] || write_ldap "$nssldapfile1" bind_policy soft
-[ ! -s "$nssldapfile1" ] || write_ldap "$nssldapfile1" bind_timelimit 30
 
 on_message()
 {
 	case "$in_action" in
 	    type)
-		write_type_item ldap_host hostname
-		write_type_item ldap_port tcp-port
+        write_type_item domain_name hostname
 		;;
 	    list)
-		[ "$in__objects" = "avail_profile" ] && list_profile
+		[ "$in__objects" = "avail_domain" ] && list_domain
 		;;
 	    read)
+        write_string_param current_domain "$(read_current)"
 
-		write_string_param profile "$(read_profile)"
-
-		local ldap_uri="$(read_ldap2 uri)"
-
-		local ldap_proto="${ldap_uri%%://*}"
-		local ldap_host="${ldap_uri#$ldap_proto://}"
-		local ldap_port="${ldap_host##*:}"
-
-		ldap_host="${ldap_host%%:*}"
-		[ "$ldap_port" != "$ldap_host" ] || ldap_port=
-
-		write_string_param ldap_host "$ldap_host"
-		write_string_param ldap_port "$ldap_port"
-
-		[ "$ldap_proto" != "ldaps" ]
-		write_bool_param ldap_ssl "$?"
-
-		write_string_param ldap_basedn "$(read_ldap2 base)"
 		;;
 	    write)
-		if [ -n "$in_ldap_host" ];then
-		    local uri="ldap://"
-		    test_bool "$in_ldap_ssl" && uri="ldaps://"
-
-		    uri="$uri$in_ldap_host"
-		    [ -n "$in_ldap_port" ] && uri="$uri:$in_ldap_port"
-
-		    write_ldap2 uri "$uri"
+        
+        if [ -n "$in_domain" -a -z "$in_domain_name" ];then
+            /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
 		fi
 
-		[ -n "$in_profile" ] && write_profile "$in_profile" 
+        [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
 
-        [ "$in_profile" = "krb5" ] && write_krb5 "$in_ldap_host"
-		
-        [ -n "$in_ldap_basedn" ] && write_ldap2 base "$in_ldap_basedn"
-	        
          write_nop
 		;;
 	esac

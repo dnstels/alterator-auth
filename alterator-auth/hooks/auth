@@ -1,0 +1,30 @@
+#!/bin/sh -f
+
+authtool="/usr/sbin/system-auth"
+
+. shell-quote
+. shell-error
+
+olddomain="$1" ; shift
+newdomain="$1" ; shift
+
+host_2_dn()
+{
+    local host="$1" ; shift
+    host="$(echo $host|sed -e "s/^/dc=/"|sed -e "s/\./,dc=/g")"
+    echo "$host"
+}
+
+rename()
+{
+    local new="${1#*.}" ; shift
+    [ -z "$new" ] && fatal "new domain must be set"
+
+    uri="ldap://127.0.0.1"
+    basedn="$(host_2_dn "$new")"
+
+    $authtool write ldap "$basedn" "$uri"
+}
+
+rename "$olddomain" "$newdomain"
+

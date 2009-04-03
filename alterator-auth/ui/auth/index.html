@@ -2,44 +2,30 @@
 <!-- authentication administration module -->
 <html wf="form">
   <head>
-    <script>
-	effectShow("ldap_host","profile","ldap");
-	effectShow("ldap_host","profile","krb5");
-	effectShow("ldap_port","profile","ldap");
-	effectShow("ldap_port","profile","krb5");
-	effectShow("ldap_ssl","profile","ldap");
-	effectShow("ldap_ssl","profile","krb5");
-	effectShow("ldap_basedn", "profile", "ldap");
-	effectShow("ldap_basedn", "profile", "krb5");
-    </script>
   </head>
   <body>
     <form method="POST">
       <table class="form-table">
+  <tr>
+	  <td><span translate="_" name="current_domain">Current domain:</span></td>
+	  <td><span class="alterator-label" name="current_domain"/></td>
+	</tr>
+
+	<tr>
+	    <td colspan="2">&nbsp;</td>
+	</tr>
         <tr>
-	  <td><span translate="_">Auth type:</span></td>
+	  <td><span translate="_">Domain list:</span></td>
           <td>
-	    <select name="profile" enumref="/auth/avail_profile"/>
+	    <select name="domain" enumref="/auth/avail_domain"/>
 	  </td>
 	</tr>
 	<tr>
 	    <td colspan="2">&nbsp;</td>
 	</tr>
 	<tr>
-	  <td><span style="display:none" translate="_" name="ldap_host">LDAP server:</span></td>
-	  <td><input style="display:none" type="text" class="text" name="ldap_host"/></td>
-	</tr>
-	<tr>
-	  <td><span style="display:none" translate="_" name="ldap_basedn">Base DN:</span></td>
-	  <td><input style="display:none" type="text" class="text" name="ldap_basedn"/></td>
-	</tr>
-	<tr>
-	  <td><span style="display:none" translate="_" name="ldap_port">Port (optional):</span></td>
-	  <td><input style="display:none" type="text" class="text" name="ldap_port"/></td>
-	</tr>
-	<tr>
-	  <td>&nbsp;</td>
-	  <td><input style="display:none" type="checkbox" name="ldap_ssl"/><span style="display:none" translate="_" name="ldap_ssl">Enable TLS/SSL</span></td>
+	  <td><span translate="_" name="domain_name">Enter Domain:</span></td>
+	  <td><input type="text" class="text" name="domain_name"/></td>
 	</tr>
 	<tr>
 	  <td colspan="2">&nbsp;</td>
@@ -48,7 +34,6 @@
 	    <td>&nbsp;</td>
 	    <td>
 		<input type="submit" value="Apply" class="btn"/>&nbsp;
-		<input type="reset" value="Reset" class="btn"/>
 	    </td>
 	</tr>
       </table>

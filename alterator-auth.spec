@@ -1,8 +1,9 @@
 %define _altdata_dir %_datadir/alterator
+%define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.8
-Release: alt2.5
+Version: 0.9
+Release: alt1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -34,13 +35,22 @@ alterator module for system wide auth settings
 
 %install
 %makeinstall
+install -Dpm755 sbin/system-auth %buildroot/%_sbindir/system-auth
+install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 
 %files
 %_datadir/alterator/applications/*
-%_datadir/alterator/ui/*
+%_datadir/alterator/ui/*/
+%_sbindir/system-auth
+%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Apr 03 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt1
+- added system-auth tool 
+- rewrote backend and ui (now using system-auth tool)
+- added /etc/hooks/hostname.d/90-auth (setting auth for servers) 
+
 * Fri Mar 27 2009 Lebedev Sergey <barabashka@altlinux.org> 0.8-alt2.5
 - removed alterator-kdc
 - wrote fill_krb_conf
