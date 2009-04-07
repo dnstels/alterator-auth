@@ -17,7 +17,7 @@ host_2_dn()
 
 rename()
 {
-    local new="${1#*.}" ; shift
+    local new="${2#*.}" ; shift
     [ -z "$new" ] && fatal "new domain must be set"
 
     uri="ldap://127.0.0.1"
