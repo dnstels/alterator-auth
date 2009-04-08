@@ -252,8 +252,8 @@ case "$action" in
         if  check_basedn "$1" && check_uri "$2" ;then
             init
             write_profile "$object"
-            write_pam_ldap base "$1"
-            write_pam_ldap uri "$2"
+            write_2_ldap base "$1"
+            write_2_ldap uri "$2"
             [ "$3" = "enable" ] && write_krb5 "$1"
         else
             exit 1
