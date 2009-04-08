@@ -2,67 +2,49 @@
 (document:insert "/std/functions")
 
 ;;; Functions
-(define (read-profile)
+(define (read-domain)
   (catch/message
     (lambda()
-      (profile-id enumref "/auth/avail_profile")
+      (domain-id enumref "/auth/avail_domain")
       (let ((data (woo-read-first "/auth")))
-	(ldap-host value (woo-get-option data 'ldap_host))
-	(ldap-port value (woo-get-option data 'ldap_port))
-	(ldap-ssl value (woo-get-option data 'ldap_ssl))
-	(ldap-basedn value (woo-get-option data 'ldap_basedn))
-	(profile-id value (woo-get-option data 'profile))))))
+    (current-id text (woo-get-option data 'current_domain))
+	))))
 
-(define (write-profile)
+(define (write-domain)
   (catch/message
     (lambda()
       (woo-write "/auth"
-		 'profile (profile-id value)
-		 'ldap_host (ldap-host value)
-		 'ldap_port (ldap-port value)
-		 'ldap_ssl (ldap-ssl value)
-		 'ldap_basedn (ldap-basedn value)))))
+		 'domain (domain-id value)
+		 'domain_name (domain-name value)))))
 
 ;;; UI
 (gridbox
   columns "0;100"
   margin 50
 
-  (label text (_ "Auth type:") align "right")
-  (document:id profile-id (combobox name "profile"))
+  (label text (_ "Current domain:") align "right")
+  (document:id current-id (label))
 
   (label colspan 2)
 
-  (label text (_ "LDAP server:") align "right" name "ldap_host" visibility #f)
-  (document:id ldap-host (edit name "ldap_host" visibility #f))
+  (label text (_ "Domain list:") align "right")
+  (document:id domain-id (combobox name "domain"))
 
-  (document:id ldap-basedn-label (label text (_ "Base DN:") align "right" name "ldap_basedn" visibility #f))
-  (document:id ldap-basedn (edit name "ldap_basedn" visibility #f))
+  (label colspan 2)
 
-  (label text (_ "Port (optional):") align "right" name "ldap_port" visibility #f)
-  (document:id ldap-port (edit name "ldap_port" visibility #f))
+  (label text (_ "Enter Domain:") align "right" name "domain_name")
+  (document:id domain-name (edit name "domain_name"))
 
-  (spacer)
-  (document:id ldap-ssl (checkbox  text (_ "Enable TLS/SSL") name "ldap_ssl" visibility #f))
 
   (label colspan 4)
 
   (spacer)
   (hbox align "left"
-	(button text (_ "Apply") (when clicked (write-profile)))
-	(button text (_ "Reset") (when clicked (read-profile) (update-effect)))))
+	(button text (_ "Apply") (when clicked (write-domain)))))
 
 ;;; Logic
 
-(effect-show "ldap_host" "profile" "ldap")
-(effect-show "ldap_host" "profile" "krb5")
-(effect-show "ldap_port" "profile" "ldap")
-(effect-show "ldap_port" "profile" "krb5")
-(effect-show "ldap_ssl" "profile" "ldap")
-(effect-show "ldap_ssl" "profile" "krb5")
-(effect-show "ldap_basedn" "profile" "ldap")
-(effect-show "ldap_basedn" "profile" "krb5")
-
 (document:root
   (when loaded
-    (and (read-profile) (init-effect))))
+    (read-domain)))
+
