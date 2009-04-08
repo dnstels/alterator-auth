@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.9
-Release: alt1
+Release: alt2
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -16,6 +16,7 @@ Group: System/Configuration/Other
 Requires: alterator >= 4.7-alt4
 Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.4.0-alt1.1
+Requires: pam_krb5
 Conflicts: alterator-fbi < 5.9-alt2
 Conflicts: alterator-lookout < 1.6-alt6
 
@@ -46,6 +47,11 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Apr 08 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt2
+- fixed nsswitch bug
+- fixed simple error (auth hook)
+- rewrote ui for domain auth
+
 * Fri Apr 03 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt1
 - added system-auth tool 
 - rewrote backend and ui (now using system-auth tool)
