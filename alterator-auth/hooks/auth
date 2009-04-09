@@ -1,5 +1,8 @@
 #!/bin/sh -f
 
+# if we are not server 
+[ -f /etc/sysconfig/system ] || exit 0
+
 authtool="/usr/sbin/system-auth"
 
 . shell-quote
