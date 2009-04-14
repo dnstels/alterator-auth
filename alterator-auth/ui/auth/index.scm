@@ -1,4 +1,4 @@
-(document:surround "/std/base")
+(document:surround "/std/frame")
 (document:insert "/std/functions")
 
 ;;; Functions
@@ -38,13 +38,16 @@
 
   (label colspan 4)
 
-  (spacer)
-  (hbox align "left"
+    (if (global 'frame:next)
+    (label)
+    (hbox align "left"
 	(button text (_ "Apply") (when clicked (write-domain)))))
+  (spacer)
+ 
+  )
 
 ;;; Logic
 
 (document:root
   (when loaded
     (read-domain)))
-
