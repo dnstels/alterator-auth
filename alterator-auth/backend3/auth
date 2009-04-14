@@ -25,6 +25,7 @@ list_domain()
 {
 	local __ prefix ip txt role domain
 
+    write_enum_item "local" "local"
 	avahi-browse -prtk _server._tcp 2>/dev/null|
 		while IFS=';' read prefix __ __ __ __ __ __ ip __ txt; do
 			[ "$prefix" = "=" ] || continue
@@ -79,7 +80,11 @@ on_message()
             /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
 		fi
 
-        [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
+        if [ "$in_domain_name" = "local" ] ;then
+            /usr/sbin/system-auth write local
+        else
+            [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
+        fi
 
          write_nop
 		;;
