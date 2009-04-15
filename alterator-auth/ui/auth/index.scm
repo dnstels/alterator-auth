@@ -15,7 +15,9 @@
     (lambda()
       (woo-write "/auth"
 		 'domain (domain-id value)
-		 'domain_name (domain-name value)))))
+		 'domain_name (domain-name value))
+      (read-domain)
+      )))
 
 ;;; UI
 (gridbox
