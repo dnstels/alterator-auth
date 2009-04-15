@@ -80,11 +80,8 @@ on_message()
             /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
 		fi
 
-        if [ "$in_domain_name" = "local" ] ;then
-            /usr/sbin/system-auth write local
-        else
-            [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
-        fi
+        [ "$in_domain" = "local" ] &&  /usr/sbin/system-auth write local
+        [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
 
          write_nop
 		;;
