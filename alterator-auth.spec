@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.9
-Release: alt2.1
+Release: alt3
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -47,6 +47,11 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Thu Apr 16 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt3
+- rewrote qt interface
+- synced html interface with qt interface
+- fixed hook (now checking SERVER_ROLE)
+
 * Thu Apr 09 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt2.1
 - added role checking (hook)
 
