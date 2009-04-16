@@ -25,7 +25,7 @@ list_domain()
 {
 	local __ prefix ip txt role domain
 
-    write_enum_item "local" "local"
+    write_enum_item "local" "$(_ "local")"
 	avahi-browse -prtk _server._tcp 2>/dev/null|
 		while IFS=';' read prefix __ __ __ __ __ __ ip __ txt; do
 			[ "$prefix" = "=" ] || continue
@@ -34,7 +34,7 @@ list_domain()
 			domain="$(txt_record domain "$txt")"
             write_enum_item "$domain" "$domain ($ip)"
 		done
-    write_enum_item "custom" "custom"
+    write_enum_item "custom" "$(_ "custom")"
 }
 
 txt_record()
@@ -67,6 +67,7 @@ on_message()
 	case "$in_action" in
 	    type)
         write_type_item domain_name hostname
+        write_type_item domain hostname
 		;;
 	    list)
 		[ "$in__objects" = "avail_domain" ] && list_domain
@@ -76,15 +77,23 @@ on_message()
 
 		;;
 	    write)
-        
-        if [ -n "$in_domain" -a -z "$in_domain_name" ];then
-            /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
-		fi
 
-        [ "$in_domain" = "local" ] &&  /usr/sbin/system-auth write local
-        [ -n "$in_domain_name" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
+        [ -z "$in_domain" ] && fatal "$(_ "Domain not set")"
 
-         write_nop
+        case "$in_domain" in
+            local)
+                /usr/sbin/system-auth write local
+            ;;
+            custom)
+                [ -z "$in_domain_name" ] && fatal "$(_ "Domain not set")"
+                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
+            ;;
+            *)
+                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
+            ;;
+        esac
+
+        write_nop
 		;;
 	esac
 }
