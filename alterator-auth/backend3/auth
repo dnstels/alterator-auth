@@ -34,6 +34,7 @@ list_domain()
 			domain="$(txt_record domain "$txt")"
             write_enum_item "$domain" "$domain ($ip)"
 		done
+    write_enum_item "custom" "custom"
 }
 
 txt_record()
