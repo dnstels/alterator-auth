@@ -48,5 +48,7 @@
 (document:root
   (when loaded
     (ui-init)
-    (form-bind "domain" "change" update-domain)
-    (form-bind "apply" "click" ui-commit)))
+    (form-bind "domain" "change" update-domain)))
+
+(frame:on-back (thunk (or (ui-commit) 'cancel)))
+(frame:on-next (thunk (or (ui-commit) 'cancel)))

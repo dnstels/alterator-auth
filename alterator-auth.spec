@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.9
-Release: alt3
+Release: alt3.1
 
 Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
@@ -47,6 +47,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Apr 17 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt3.1
+- fixed ui bug (installer) 
+
 * Thu Apr 16 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt3
 - rewrote qt interface
 - synced html interface with qt interface
