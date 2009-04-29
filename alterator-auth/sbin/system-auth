@@ -159,7 +159,6 @@ write_krb5()
 {
     local domain="$(dn_2_host "$1")"
 
-    fill_krb_conf "$domain" > "$krb5_conf"
 }
 
 dn_2_host()
@@ -169,39 +168,6 @@ dn_2_host()
     echo "$dn"|sed -e 's/^dc=//i'|sed -e 's/,dc=/\./g'
 }
 
-fill_krb_conf()
-{
-    local domain="$1"
-    local realm="$(echo "$domain"|tr '[[:lower:]]' '[[:upper:]]')"
-
-cat << E_O_F
-[logging]
-default = FILE:/var/log/krb5libs.log
-
-[libdefaults]
-default_realm = $realm
-dns_lookup_realm = true
-dns_lookup_kdc = true
-
-[domain_realm]
-.$domain = $realm
-$domain = $realm
-
-[realms]
-$realm = {
-  kdc = kdc.$domain:88
-  admin_server = kdc.$domain:749
-  default_domain = $domain
- }
-
-[pam]
- debug = false
- ticket_lifetime = 36000
- renew_lifetime = 36000
- forwardable = true
- krb4_convert = false
-E_O_F
-}
 
 remove_host_from_confs()
 {

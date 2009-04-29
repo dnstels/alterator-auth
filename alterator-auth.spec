@@ -2,10 +2,9 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.9
-Release: alt3.1
+Version: 0.10
+Release: alt1
 
-Packager: Stanislav Ievlev <inger@altlinux.org>
 BuildArch: noarch
 
 Source:%name-%version.tar
@@ -47,6 +46,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Apr 29 2009 Anton V. Boyarshinov <boyarsh@altlinux.ru> 0.10-alt1
+- removed /etc/krb5.conf filling (default is better) 
+
 * Fri Apr 17 2009 Lebedev Sergey <barabashka@altlinux.org> 0.9-alt3.1
 - fixed ui bug (installer) 
 
