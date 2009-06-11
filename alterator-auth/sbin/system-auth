@@ -166,12 +166,6 @@ write_config()
     shell_config_set "$1" "$2" "$3" "$rdelim" "$wdelim"
 }
 
-write_krb5()
-{
-    local domain="$(dn_2_host "$1")"
-
-}
-
 dn_2_host()
 {
     local dn="$1"
@@ -231,7 +225,6 @@ case "$action" in
             write_profile "$object"
             write_2_ldap base "$1"
             write_2_ldap uri "$2"
-            [ "$3" = "enable" ] && write_krb5 "$1"
         else
             exit 1
         fi

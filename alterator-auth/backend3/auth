@@ -86,10 +86,10 @@ on_message()
             ;;
             custom)
                 [ -z "$in_domain_name" ] && fatal "$(_ "Domain not set")"
-                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name" enable
+                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain_name")" ldap://ldap."$in_domain_name"
             ;;
             *)
-                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain" enable
+                /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" ldap://ldap."$in_domain"
             ;;
         esac
 
