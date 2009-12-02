@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.10
-Release: alt2
+Release: alt3
 
 BuildArch: noarch
 
@@ -46,6 +46,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Dec 02 2009 Dmitriy L. Kruglikov <dkr@altlinux.org> 0.10-alt3
+- Added Local|LDAP|KRB5 support and LDAP base selection.
+
 * Thu Jun 11 2009 Lebedev Sergey <barabashka@altlinux.org> 0.10-alt2
 - removed write_krb5 (unnecessary function)
 - merged with Anton V. Boyarshinov
