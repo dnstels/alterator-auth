@@ -145,7 +145,7 @@ on_message()
     		write_string_param current_domain "$(read_current)"
 		;;
 	    write)
-		echo "$(set|grep -a "in_")" >&2
+		#echo "$(set|grep -a "in_")" >&2
 		case "$in_auth_type" in
 		local)
 		    /usr/sbin/system-auth write local
