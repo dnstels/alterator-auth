@@ -78,6 +78,11 @@
        ((string-ci=? type "multi")(multi_selected))
        ((string-ci=? type "pkcs11")(pkcs11_selected))
        (else (local_selected)))))
+       
+(define (save_settings)
+  (catch/message
+    (lambda() (apply woo-write "/auth" (form-value-list))))
+    (ui-init)   )
 
 (define (init)
     (ui-init)
@@ -86,4 +91,5 @@
     (form-bind "local_bases" "change" set_basedn)
     (form-bind "ldap_host" "change" ldap_changed)
     (form-bind "show_bdn" "click" show_bases)
+    (form-bind "app_btn" "click" save_settings)
 )

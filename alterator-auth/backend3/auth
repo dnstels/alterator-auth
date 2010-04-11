@@ -145,12 +145,13 @@ on_message()
     		write_string_param current_domain "$(read_current)"
 		;;
 	    write)
+		echo "$(set|grep -a "in_")" >&2
 		case "$in_auth_type" in
 		local)
 		    /usr/sbin/system-auth write local
 		;;
 		ldap)
-		    [ -z "$in_ldap_ssl" ] && ldap_uri="ldap://" || ldap_uri="ldaps://"
+		    [ "$in_ldap_ssl" == "on" ] && ldap_uri="ldaps://" || ldap_uri="ldap://"
 		    /usr/sbin/system-auth write ldap "$in_ldap_basedn" "$ldap_uri$in_ldap_host"
 		;;
 		krb5)
