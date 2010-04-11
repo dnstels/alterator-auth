@@ -2,8 +2,8 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.10
-Release: alt3
+Version: 0.20
+Release: alt1
 
 BuildArch: noarch
 
@@ -46,6 +46,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Sun Apr 11 2010 Dmitriy L. Kruglikov <dkr@altlinux.org> 0.20-alt1
+- Refabrisched after wf="form"->wf="none" migration.
+
 * Wed Dec 02 2009 Dmitriy L. Kruglikov <dkr@altlinux.org> 0.10-alt3
 - Added Local|LDAP|KRB5 support and LDAP base selection.
 
