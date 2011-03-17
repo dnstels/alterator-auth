@@ -2,7 +2,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.21
+Version: 0.22
 Release: alt1
 
 BuildArch: noarch
@@ -16,6 +16,7 @@ Requires: alterator >= 4.7-alt4
 Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.4.0-alt1.1
 Requires: pam_krb5
+Requires: nss_ldap
 Conflicts: alterator-fbi < 5.9-alt2
 Conflicts: alterator-lookout < 1.6-alt6
 
@@ -46,6 +47,10 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Thu Mar 17 2011 Anton V. Boyarshinov <boyarsh@altlinux.ru> 0.22-alt1
+- set ldaps:// for kerberos domain
+- requres on nss_ldap added
+
 * Fri Oct 01 2010 Anton V. Boyarshinov <boyarsh@altlinux.ru> 0.21-alt1
 - fixed domain selection in acc
 

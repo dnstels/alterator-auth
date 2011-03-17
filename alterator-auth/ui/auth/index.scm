@@ -10,7 +10,7 @@
     (lambda()
       (apply woo-write
 	     "/auth"
-	     "auth_type" "krb5" (form-value-list))
+	     "ldap_ssl" "on" "auth_type" "krb5" (form-value-list))
       (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
 
 (define (ui-init)
