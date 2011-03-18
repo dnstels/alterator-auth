@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.22
-Release: alt1
+Release: alt2
 
 BuildArch: noarch
 
@@ -47,6 +47,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Fri Mar 18 2011 Anton V. Boyarshinov <boyarsh@altlinux.ru> 0.22-alt2
+- alwais ldaps if kerberos
+
 * Thu Mar 17 2011 Anton V. Boyarshinov <boyarsh@altlinux.ru> 0.22-alt1
 - set ldaps:// for kerberos domain
 - requres on nss_ldap added
