@@ -11,7 +11,8 @@
       (apply woo-write
 	     "/auth"
 	     "ldap_ssl" "on" "auth_type" "krb5" (form-value-list))
-      (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
+      (form-update-value-list '("current_domain") (woo-read-first "/auth"))))
+  (form-update-visibility '("warn_message") #t))
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
@@ -37,6 +38,9 @@
     
     (label colspan 2)
     
+	(label colspan 2 name "warn_message" text (_ "WARNING: Changes will take effect after reboot") visibility #f)
+
+    (label colspan 2)
     (if (global 'frame:next)
     (label)
     (hbox align "left"
