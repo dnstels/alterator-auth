@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.22
-Release: alt3
+Release: alt4
 
 BuildArch: noarch
 
@@ -47,6 +47,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Wed Apr 18 2012 Mikhail Efremov <sem@altlinux.org> 0.22-alt4
+- Always show warning message.
+
 * Tue Apr 17 2012 Mikhail Efremov <sem@altlinux.org> 0.22-alt3
 - Show warning message about reboots necessity.
 
