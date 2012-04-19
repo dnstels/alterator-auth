@@ -37,7 +37,8 @@
     
     (label colspan 2)
     
-	(label colspan 2 text (_ "WARNING: Changes will take effect after reboot") visibility #t)
+	(label colspan 2 text (string-append (bold (_ "Attention: "))
+										 (_ "Domain change needs reboot for normal operation")))
 
     (label colspan 2)
     (if (global 'frame:next)
