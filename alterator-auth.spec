@@ -3,7 +3,7 @@
 
 Name: alterator-auth
 Version: 0.22
-Release: alt4
+Release: alt5
 
 BuildArch: noarch
 
@@ -47,6 +47,10 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Thu Apr 19 2012 Mikhail Efremov <sem@altlinux.org> 0.22-alt5
+- Add string for translation.
+- Improve warning message.
+
 * Wed Apr 18 2012 Mikhail Efremov <sem@altlinux.org> 0.22-alt4
 - Always show warning message.
 
