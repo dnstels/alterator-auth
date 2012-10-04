@@ -13,7 +13,7 @@ pamldapfile="/etc/pam_ldap.conf"
 #nss configuration
 nssldapfile=
 nssldapfile1="/etc/nss_ldap.conf"
-nssldapfile2="/etc/nss-ldapd.conf"
+nssldapfile2="/etc/nslcd.conf"
 nsswitchfile="/etc/nsswitch.conf"
 
 #select between nss_ldap and nss_ldapd
@@ -105,7 +105,11 @@ read_ldap()
 
 read_ldap2()
 {
-    read_ldap "$pamldapfile" "$1"
+    local f
+    f=
+    [ -f "$nssldapfile" ] && f="$nssldapfile"
+    [ -f "$pamldapfile" ] && f="$pamldapfile"
+    [ -n "$f" ] && read_ldap "$f" "$1"
 }
 
 get_ldap()

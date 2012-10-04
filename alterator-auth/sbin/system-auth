@@ -9,7 +9,7 @@ pamldapfile="/etc/pam_ldap.conf"
 #nss configuration
 nssldapfile=
 nssldapfile1="/etc/nss_ldap.conf"
-nssldapfile2="/etc/nss-ldapd.conf"
+nssldapfile2="/etc/nslcd.conf"
 nsswitchfile="/etc/nsswitch.conf"
 
 #openldap conf
@@ -18,7 +18,7 @@ ldap_conf="/etc/openldap/ldap.conf"
 # krb conf
 krb5_conf="/etc/krb5.conf"
 
-#select between nss_ldap and nss_ldapd
+#select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
 
@@ -71,8 +71,13 @@ pam_ldap_info()
 {
     local uri basedn
 
-    uri="$(read_pam_ldap uri)"
-    basedn="$(read_pam_ldap base)"
+    if [ -f "$pamldapfile" ];then
+        uri="$(read_pam_ldap uri)"
+        basedn="$(read_pam_ldap base)"
+    else
+        uri="$(read_nss_ldap uri)"
+        basedn="$(read_nss_ldap base)"
+    fi
 
     check_uri "$uri" && check_basedn "$basedn" && echo "$basedn $uri" 
 }
@@ -104,6 +109,12 @@ read_pam_ldap()
     read_config "$pamldapfile" "$1"
 }
 
+
+read_nss_ldap()
+{
+    read_config "$nssldapfile" "$1"
+}
+
 read_config()
 {
     shell_config_get "$1" "$2" "$rdelim"
@@ -119,12 +130,7 @@ write_profile()
 	    write_nsswitch "shadow" "tcb files"
 	    write_nsswitch "group" "files"
 	    ;;
-	ldap)
-	    write_nsswitch "passwd" "files ldap"
-	    write_nsswitch "shadow" "tcb files ldap"
-	    write_nsswitch "group" "files ldap"
-	    ;;
-	krb5)
+	ldap|krb5)
 	    write_nsswitch "passwd" "files ldap"
 	    write_nsswitch "shadow" "tcb files ldap"
 	    write_nsswitch "group" "files ldap"
@@ -146,7 +152,7 @@ write_2_ldap()
 
 write_pam_ldap()
 {
-    write_config "$pamldapfile" "$1" "$2"
+    [ -f "$pamldapfile" ] && write_config "$pamldapfile" "$1" "$2"
 }
 
 write_nss_ldap()
@@ -190,8 +196,10 @@ init()
 {
     # removing host parameter from pam_ldap_conf
     remove_host_from_confs
-    [ ! -s "$nssldapfile1" ] || write_config "$nssldapfile1" bind_policy soft
-    [ ! -s "$nssldapfile1" ] || write_config "$nssldapfile1" bind_timelimit 30
+    if [ -f "$nssldapfile1" ]; then
+        write_config "$nssldapfile1" bind_policy soft
+        write_config "$nssldapfile1" bind_timelimit 30
+    fi
 }
 
 action="$1" ; shift
@@ -207,24 +215,20 @@ case "$action" in
     write)
     case "$object" in
         local)
+            # if service nslcd from nss-ldapd is running, stop it
+            service nslcd status >/dev/null 2>&1 && service nslcd stop >/dev/null
             write_profile "$object"
         ;;
-        ldap)
+        ldap|krb5)
         if  check_basedn "$1" && check_uri "$2"  ;then
             init
             write_profile "$object"
             write_2_ldap base "$1"
             write_2_ldap uri "$2"
-        else
-            exit 1
-        fi
-        ;;
-        krb5)
-        if  check_basedn "$1" && check_uri "$2" ;then
-            init
-            write_profile "$object"
-            write_2_ldap base "$1"
-            write_2_ldap uri "$2"
+            # if nss-ldapd is used, restart daemon
+            if [ -f /etc/init.d/nslcd ]; then
+                service nslcd restart >/dev/null
+            fi
         else
             exit 1
         fi
