@@ -58,7 +58,15 @@ list_domain()
 {
 	local __ prefix ip txt role domain
 
+    # Check if avahi-daemon is running for browse domain
+    if [ -z "$(service avahi-daemon status|grep 'running$')" ]; then
+        write_error "error_browse"
+        exit 1
+    fi
+
 	write_enum_item "local" "$(_ "local")"
+
+    # Lookup available domains in Zeroconf
 	avahi-browse -prtk _server._tcp 2>/dev/null|
 		while IFS=';' read prefix __ __ __ __ __ __ ip __ txt; do
 			[ "$prefix" = "=" ] || continue
@@ -138,42 +146,42 @@ on_message()
 	    type)
     		write_type_item domain_name hostname
     		write_type_item domain hostname
-		;;
+		    ;;
 	    list)
-		[ "$in__objects" = "avail_domain" ] && list_domain
-		[ "$in__objects" = "local_bases" ] && local_bases
-		;;
+		    [ "$in__objects" = "avail_domain" ] && list_domain || return
+    		[ "$in__objects" = "local_bases" ] && local_bases
+	    	;;
 	    read)
-		write_string_param "auth_type" "$(/usr/sbin/system-auth status |cut -f1 -d ' ')"
-		get_ldap
+		    write_string_param "auth_type" "$(/usr/sbin/system-auth status |cut -f1 -d ' ')"
+		    get_ldap
     		write_string_param current_domain "$(read_current)"
-		;;
+		    ;;
 	    write)
-		#echo "$(set|grep -a "in_")" >&2
-		case "$in_auth_type" in
-		local)
-		    /usr/sbin/system-auth write local
-		;;
-		ldap)
-		    [ "$in_ldap_ssl" == "on" ] && ldap_uri="ldaps://" || ldap_uri="ldap://"
-		    /usr/sbin/system-auth write ldap "$in_ldap_basedn" "$ldap_uri$in_ldap_host"
-		;;
-		krb5)
-		    if [ "$in_domain" = "local" ]; then
-			/usr/sbin/system-auth write local
-		    else
-		        ldap_uri="ldaps://"
-			[ -n "$in_domain" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" || fatal "$(_ "Domain not set")"		    
-		    fi
-		;;
-		multi)
-		;;
-		pkcs11)
-		;;
-		*)
-		;;
-		esac
-		;;
+            #echo "$(set|grep -a "in_")" >&2
+            case "$in_auth_type" in
+                local)
+                    /usr/sbin/system-auth write local
+                    ;;
+                ldap)
+                    [ "$in_ldap_ssl" == "on" ] && ldap_uri="ldaps://" || ldap_uri="ldap://"
+                    /usr/sbin/system-auth write ldap "$in_ldap_basedn" "$ldap_uri$in_ldap_host"
+                    ;;
+                krb5)
+                    if [ "$in_domain" = "local" ]; then
+                        /usr/sbin/system-auth write local
+                    else
+                        ldap_uri="ldaps://"
+                        [ -n "$in_domain" ] && /usr/sbin/system-auth write krb5 "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" || fatal "$(_ "Domain not set")"		    
+                    fi
+                    ;;
+                multi)
+                    ;;
+                pkcs11)
+                    ;;
+                *)
+                    ;;
+            esac
+            ;;
 	esac
 }
 message_loop

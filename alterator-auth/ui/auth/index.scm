@@ -16,7 +16,18 @@
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
     (form-update-value-list '("current_domain") data)
-    (form-update-enum "domain" (woo-list "/auth/avail_domain"))
+
+    ;;; Check avahi available for domain lookup
+    (woo-catch
+        (lambda() (form-update-enum "domain" (woo-list "/auth/avail_domain")))
+        (lambda(reason) 
+                (domain-list-label visibility #f)
+                (domain-list visibility #f)
+                (avahi-warning visibility #t)
+                (change-attention visibility #f)
+                (apply-button visibility #f)
+            ))
+
     (update-domain)))
 
 ;;; UI
@@ -29,22 +40,29 @@
 
     (label colspan 2)
 
-    (label text (_ "Domain list:") align "right")
-    (combobox name "domain")
+    (document:id domain-list-label (label text (_ "Domain list:") align "right"))
+    (document:id domain-list (combobox name "domain"))
+
+    ;;; Warning if avahi-daemon is out of gear
+    (document:id avahi-warning 
+        (label colspan 2 text (string-append (bold (_ "Warning: "))
+		 	    							 (_ "Search for domains is impossible because avahi-daemon is not started"))
+                         visibility #f))
     
     (spacer)
     (edit name "domain_name" visibility #t)
     
     (label colspan 2)
-    
-	(label colspan 2 text (string-append (bold (_ "Attention: "))
-										 (_ "Domain change needs reboot for normal operation")))
+
+	(document:id change-attention 
+        (label colspan 2 text (string-append (bold (_ "Attention: "))
+		 	                                 (_ "Domain change needs reboot for normal operation"))))
 
     (label colspan 2)
     (if (global 'frame:next)
     (label)
     (hbox align "left"
-	(button name "apply" text (_ "Apply") (when clicked (ui-commit)))))
+	(document:id apply-button (button name "apply" text (_ "Apply") (when clicked (ui-commit))))))
 )
 
 ;;; Logic
