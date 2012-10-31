@@ -216,7 +216,10 @@ case "$action" in
     case "$object" in
         local)
             # if service nslcd from nss-ldapd is running, stop it
-            service nslcd status >/dev/null 2>&1 && service nslcd stop >/dev/null
+            if [ -f /etc/init.d/nslcd ]; then
+                chkconfig nslcd off
+                service nslcd stop >/dev/null
+            fi
             write_profile "$object"
         ;;
         ldap|krb5)
@@ -227,7 +230,9 @@ case "$action" in
             write_2_ldap uri "$2"
             # if nss-ldapd is used, restart daemon
             if [ -f /etc/init.d/nslcd ]; then
-                service nslcd restart >/dev/null
+                chkconfig nslcd on
+                [ -n "$(service nslcd status| grep 'running$')"] && service nslcd stop >/dev/null
+                service nslcd start >/dev/null
             fi
         else
             exit 1
