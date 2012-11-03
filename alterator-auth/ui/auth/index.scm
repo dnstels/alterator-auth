@@ -21,11 +21,7 @@
     (woo-catch
         (lambda() (form-update-enum "domain" (woo-list "/auth/avail_domain")))
         (lambda(reason) 
-                (domain-list-label visibility #f)
-                (domain-list visibility #f)
                 (avahi-warning visibility #t)
-                (change-attention visibility #f)
-                (apply-button visibility #f)
             ))
 
     (update-domain)))
