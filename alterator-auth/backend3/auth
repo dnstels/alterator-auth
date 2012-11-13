@@ -59,8 +59,9 @@ list_domain()
 	local __ prefix ip txt role domain
 
     # Check if avahi-daemon is running for browse domain
-    service avahi-daemon status &>/dev/null
-    if [ "$?" -eq "0" ]; then
+    status=
+    service avahi-daemon status &>/dev/null && status="running"
+    if [ "$status" != "running" ]; then
         write_error "error_browse"
         exit 1
     fi
