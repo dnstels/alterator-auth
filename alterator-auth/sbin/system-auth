@@ -41,8 +41,8 @@ get_status()
         ldap)
             echo -n "ldap " && pam_ldap_info
         ;;
-        krb5)
-            echo -n "krb5 " && pam_ldap_info
+        krb5*)
+            echo -n "$status " && pam_ldap_info
         ;;
         *)
             echo "unknown status"
@@ -130,7 +130,7 @@ write_profile()
 	    write_nsswitch "shadow" "tcb files"
 	    write_nsswitch "group" "files"
 	    ;;
-	ldap|krb5)
+	ldap|krb5*)
 	    write_nsswitch "passwd" "files ldap"
 	    write_nsswitch "shadow" "tcb files ldap"
 	    write_nsswitch "group" "files ldap"
@@ -222,7 +222,7 @@ case "$action" in
             fi
             write_profile "$object"
         ;;
-        ldap|krb5)
+        ldap|krb5*)
         if  check_basedn "$1" && check_uri "$2"  ;then
             init
             write_profile "$object"

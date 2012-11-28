@@ -100,7 +100,7 @@ read_current()
     local status="$(echo "$data"|cut -f1 -d' ')"
     local dn
 
-    [ "$status" = "krb5" ] \
+    echo "$status" | grep -q "^krb5" \
 	&& dn="$(echo "$data"|cut -f2 -d' ')" \
 	&& dn_2_host "$dn" \
 	&& return
