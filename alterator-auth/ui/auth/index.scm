@@ -23,7 +23,7 @@
         (lambda(reason) 
                 (avahi-warning visibility #t)
             ))
-
+    (form-update-value "domain" (woo-get-option data 'current_domain))
     (update-domain)))
 
 ;;; UI
@@ -44,9 +44,9 @@
         (label colspan 2 text (string-append (bold (_ "Warning: "))
 		 	    							 (_ "Search for domains is impossible because avahi-daemon is not started"))
                          visibility #f))
-    
-    (spacer)
     (edit name "domain_name" visibility #t)
+    (checkbox colspan 2 text(_"Use cached credentials for out of domain login") name "ccreds")    
+    (spacer)
     
     (label colspan 2)
 
