@@ -15,7 +15,7 @@
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
-    (form-update-value-list '("current_domain") data)
+    (form-update-value-list '("current_domain" "ccreds") data)
 
     ;;; Check avahi available for domain lookup
     (woo-catch

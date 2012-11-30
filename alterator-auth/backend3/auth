@@ -154,9 +154,11 @@ on_message()
     		[ "$in__objects" = "local_bases" ] && local_bases
 	    	;;
 	    read)
-		    write_string_param "auth_type" "$(/usr/sbin/system-auth status |cut -f1 -d ' ')"
+		    auth_type="$(/usr/sbin/system-auth status |cut -f1 -d ' ')"
+		    write_string_param "auth_type" "$auth_type"
 		    get_ldap
-    		write_string_param current_domain "$(read_current)"
+		    write_string_param current_domain "$(read_current)"
+		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
 		    ;;
 	    write)
             #echo "$(set|grep -a "in_")" >&2
