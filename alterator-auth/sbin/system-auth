@@ -231,7 +231,7 @@ case "$action" in
             # if nss-ldapd is used, restart daemon
             if [ -f /etc/init.d/nslcd ]; then
                 chkconfig nslcd on
-                [ -n "$(service nslcd status| grep 'running$')"] && service nslcd stop >/dev/null
+                [ -n "$(service nslcd status| grep 'running$')" ] && service nslcd stop >/dev/null
                 service nslcd start >/dev/null
             fi
         else
