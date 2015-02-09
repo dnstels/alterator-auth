@@ -12,17 +12,21 @@ nssldapfile1="/etc/nss_ldap.conf"
 nssldapfile2="/etc/nslcd.conf"
 nsswitchfile="/etc/nsswitch.conf"
 
-#openldap conf
+# openldap conf
 ldap_conf="/etc/openldap/ldap.conf"
 
 # krb conf
 krb5_conf="/etc/krb5.conf"
+
+# samba conf
+smb_conf="/etc/samba/smb.conf"
 
 #select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
 
 . shell-config
+. shell-ini-config
 . shell-quote
 . shell-error
 
@@ -44,6 +48,9 @@ get_status()
         krb5*)
             echo -n "$status " && pam_ldap_info
         ;;
+        winbind)
+            echo -n "ad " && pam_ad_info
+		;;
         *)
             echo "unknown status"
         ;;
@@ -65,6 +72,10 @@ list()
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libnss_ldap.so.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libkrb5.so.*')" ] &&
 	echo "krb5" 
+
+    # checking winbind libs
+    [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_winbind.*')" ] &&
+	echo "ad"
 }
 
 pam_ldap_info()
@@ -80,6 +91,14 @@ pam_ldap_info()
     fi
 
     check_uri "$uri" && check_basedn "$basedn" && echo "$basedn $uri" 
+}
+
+pam_ad_info()
+{
+	local domain="$(ini_config_get "$smb_conf" "global" "realm")"
+	local hostname="$(ini_config_get "$smb_conf" "global" "netbios name")"
+	local workgroup="$(ini_config_get "$smb_conf" "global" "workgroup")"
+    echo "$domain $hostname $workgroup"
 }
 
 check_uri()
@@ -123,7 +142,9 @@ read_config()
 
 write_profile()
 {
-    /usr/sbin/control system-auth "$1" &&
+    local scheme="$1"
+	[ "$scheme" = "ad" ] && scheme="winbind"
+    /usr/sbin/control system-auth "$scheme" &&
     case "$1" in
 	local)
 	    write_nsswitch "passwd" "files"
@@ -134,6 +155,11 @@ write_profile()
 	    write_nsswitch "passwd" "files ldap"
 	    write_nsswitch "shadow" "tcb files ldap"
 	    write_nsswitch "group" "files ldap"
+	    ;;
+	ad)
+	    write_nsswitch "passwd" "files winbind"
+	    write_nsswitch "shadow" "tcb files winbind"
+	    write_nsswitch "group" "files winbind"
 	    ;;
     esac
 }
@@ -190,6 +216,62 @@ del_from_conf_var()
     shell_config_del "$1" "$2" "$rdelim"
 }
 
+smb_param()
+{
+	ini_config_set "$smb_conf" "global" "$1" "$2"
+}
+
+upper()
+{
+    echo -n "$1" | tr '[[:lower:]]' '[[:upper:]]'
+}
+
+write_ad_conf()
+{
+	local domain="$1"
+	local hostname="$2"
+	local workgroup="$3"
+
+    # Prepare values for configuration
+    [ -z "$hostname" ] && hostname="$(hostname -s)"
+    [ -z "$workgroup" ] && workgroup="${domain/.*/}"
+
+    # Convert to upper case
+    domain="$(upper $domain)"
+    hostname="$(upper $hostname)"
+    workgroup="$(upper $workgroup)"
+
+    # Prepare file for write parameters
+    test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
+
+    # Write main parameters
+    smb_param "security" ads
+    smb_param "realm" "$domain"
+    smb_param "workgroup" "$workgroup"
+    smb_param "netbios name" "$hostname"
+    smb_param "encrypt passwords" true
+    smb_param "dns proxy" no 
+    smb_param "socket options" TCP_NODELAY
+    smb_param "template shell" /bin/bash
+    smb_param "winbind use default domain" yes
+    smb_param "winbind refresh tickets"  yes
+
+    # Other parameters
+    #smb_param "idmap config * : range" "10000-20000"
+    #smb_param "idmap config * : backend" tdb
+    #smb_param "winbind enum users" yes
+    #smb_param "winbind enum groups" yes
+    #smb_param "domain master" no
+    #smb_param "local master" no
+    #smb_param "preferred master" no
+    #smb_param "os level" 0
+    #smb_param "domain logons" no
+    #smb_param "load printers" no
+    #smb_param "show add printer wizard" no
+    #smb_param "printcap name" /dev/null
+    #smb_param "disable spoolss" yes
+}
+
 
 #initial settings
 init()
@@ -201,6 +283,63 @@ init()
         write_config "$nssldapfile1" bind_timelimit 30
     fi
 }
+
+# Enable service and (re)start it
+enable_service() {
+    service="$1"
+    if [ -f "/etc/init.d/$service" ]; then
+        chkconfig $service on &>/dev/null
+        [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
+        service $service start >/dev/null
+    fi
+}
+
+# Disable service and stop it
+disable_service() {
+    service="$1"
+    if [ -f "/etc/init.d/$service" ]; then
+        chkconfig $service off &>/dev/null
+        [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
+    fi
+}
+
+# Join to Active Directory domin
+join_ad_domain()
+{
+    local domain="$(upper $1)"
+    local user="$2"
+    local password="$3"
+
+    # Prepare Kerberos environment
+    local i="$shell_ini_config_prefix"
+    export shell_ini_config_prefix=''
+    ini_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
+    export shell_ini_config_prefix="$i"
+
+    # Remove realms section
+    sed -i '/^\[realms\]/,/^\[/{//!d};/^\[realms\]/d' "$krb5_conf"
+    # Add realm
+    cat >> "$krb5_conf" << EOF.
+[realms]
+$domain = {
+kdc = $domain
+}
+EOF.
+
+    # Get Kerberos ticket for administrator
+    echo "$password" | kinit "$user@$domain" >/dev/null
+
+    # Join to domain
+    net ads join -U"$user%$password"
+
+    # Destroy ticket
+    kdestroy
+}
+
+# Disable service of old scheme
+current="$(/usr/sbin/control system-auth)"
+[ "$current" = "ldap" -o "$current" = "krb5" ] && disable_service nslcd
+[ "$current" = "winbind" ] && disable_service winbind
 
 action="$1" ; shift
 [ $# -ge 1 ] && object="$1" && shift
@@ -215,29 +354,34 @@ case "$action" in
     write)
     case "$object" in
         local)
-            # if service nslcd from nss-ldapd is running, stop it
-            if [ -f /etc/init.d/nslcd ]; then
-                chkconfig nslcd off
-                service nslcd stop >/dev/null
-            fi
             write_profile "$object"
         ;;
         ldap|krb5*)
-        if  check_basedn "$1" && check_uri "$2"  ;then
-            init
-            write_profile "$object"
-            write_2_ldap base "$1"
-            write_2_ldap uri "$2"
-            # if nss-ldapd is used, restart daemon
-            if [ -f /etc/init.d/nslcd ]; then
-                chkconfig nslcd on
-                [ -n "$(service nslcd status| grep 'running$')" ] && service nslcd stop >/dev/null
-                service nslcd start >/dev/null
+            if  check_basedn "$1" && check_uri "$2"  ;then
+                init
+                write_profile "$object"
+                write_2_ldap base "$1"
+                write_2_ldap uri "$2"
+                # if nss-ldapd is used, restart daemon
+				enable_service nslcd
+            else
+                exit 1
             fi
-        else
-            exit 1
-        fi
         ;;
+        ad)
+            if  test -n "$1" ;then
+                init
+                write_profile "$object"
+                # Store configuration parameters: domain [hostname] [workgroup]
+				write_ad_conf "$1" "$2" "$3"
+                # Join computer to domain
+                join_ad_domain "$1" "$4" "$5"
+                # prepare winbind service
+                enable_service winbind
+            else
+                exit 1
+            fi
+		;;
         *)
             fatal "unknown auth type $object"
         ;;
@@ -247,3 +391,4 @@ case "$action" in
         echo "$0 action [object]"
     ;;
 esac
+
