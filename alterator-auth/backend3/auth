@@ -107,7 +107,7 @@ read_current()
 	&& dn_2_host "$dn" \
 	&& return
 
-    echo "`_ "Kerberos domain do not used"`"
+    echo "`_ "Kerberos domain is not used"`"
 }
 
 read_ldap()
