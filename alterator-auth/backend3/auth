@@ -66,7 +66,7 @@ list_domain()
     service avahi-daemon status &>/dev/null && status="running"
     if [ "$status" != "running" ]; then
         write_error "error_browse"
-        exit 1
+        return 1
     fi
 
 	write_enum_item "local" "$(_ "local")"
