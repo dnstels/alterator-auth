@@ -22,6 +22,7 @@ nsswitchfile="/etc/nsswitch.conf"
 
 
 . alterator-sh-functions
+. alterator-openldap-functions
 . shell-config
 . shell-quote
 
@@ -48,8 +49,9 @@ local_bases(){
     	    write_enum_item "$base_dn" "$base_dn"
         done 2>/dev/null
     else
-	ldap-dn list | while read basedn configfile;do
-	    write_enum_item "$basedn" "$basedn"
+        for conf in $(read_slapd_conf include|egrep -i "slapd-[.a-z0-9_-]+\.conf[[:blank:]]*$") ;do
+                local basedn="$(read_config "$conf" suffix)"
+		[ -z "$suffix" ] || write_enum_item "$basedn" "$basedn"
 	done
     fi
 }
