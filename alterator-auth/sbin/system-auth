@@ -310,6 +310,10 @@ join_ad_domain()
     local user="$2"
     local password="$3"
 
+    [ -x /usr/bin/kinit ] || fatal "krb5-kinit is required for join to Active Directory domain"
+    [ -x /usr/bin/net ] || fatal "samba-common is required for join to Active Directory domain"
+    [ -e /etc/init.d/winbind ] || fatal "samba-winbind is required for join to Active Directory domain"
+
     # Prepare Kerberos environment
     local i="$shell_ini_config_prefix"
     export shell_ini_config_prefix=''
@@ -373,7 +377,7 @@ case "$action" in
                 init
                 write_profile "$object"
                 # Store configuration parameters: domain [hostname] [workgroup]
-				write_ad_conf "$1" "$2" "$3"
+                write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
                 join_ad_domain "$1" "$4" "$5"
                 # prepare winbind service
