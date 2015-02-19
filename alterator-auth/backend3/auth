@@ -49,10 +49,11 @@ local_bases(){
     	    write_enum_item "$base_dn" "$base_dn"
         done 2>/dev/null
     else
+        test -e "$SLAPD_CONF" || return
         for conf in $(read_slapd_conf include|egrep -i "slapd-[.a-z0-9_-]+\.conf[[:blank:]]*$") ;do
-                local basedn="$(read_config "$conf" suffix)"
-		[ -z "$suffix" ] || write_enum_item "$basedn" "$basedn"
-	done
+            local basedn="$(read_config "$conf" suffix)"
+            [ -z "$suffix" ] || write_enum_item "$basedn" "$basedn"
+        done
     fi
 }
 
