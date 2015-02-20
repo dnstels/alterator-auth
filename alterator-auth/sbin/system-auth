@@ -216,11 +216,6 @@ del_from_conf_var()
     shell_config_del "$1" "$2" "$rdelim"
 }
 
-smb_param()
-{
-	ini_config_set "$smb_conf" "global" "$1" "$2"
-}
-
 upper()
 {
     echo -n "$1" | tr '[[:lower:]]' '[[:upper:]]'
@@ -232,44 +227,50 @@ write_ad_conf()
 	local hostname="$2"
 	local workgroup="$3"
 
-    # Prepare values for configuration
-    [ -z "$hostname" ] && hostname="$(hostname -s)"
-    [ -z "$workgroup" ] && workgroup="${domain/.*/}"
+	# Prepare values for configuration
+	[ -z "$hostname" ] && hostname="$(hostname -s)"
+	[ -z "$workgroup" ] && workgroup="${domain/.*/}"
 
-    # Convert to upper case
-    domain="$(upper $domain)"
-    hostname="$(upper $hostname)"
-    workgroup="$(upper $workgroup)"
+	# Convert to upper case
+	domain="$(upper $domain)"
+	hostname="$(upper $hostname)"
+	workgroup="$(upper $workgroup)"
 
-    # Prepare file for write parameters
-    test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
+	# Prepare file for write parameters
+	test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
 
-    # Write main parameters
-    smb_param "security" ads
-    smb_param "realm" "$domain"
-    smb_param "workgroup" "$workgroup"
-    smb_param "netbios name" "$hostname"
-    smb_param "encrypt passwords" true
-    smb_param "dns proxy" no 
-    smb_param "socket options" TCP_NODELAY
-    smb_param "template shell" /bin/bash
-    smb_param "winbind use default domain" yes
-    smb_param "winbind refresh tickets"  yes
+	# Write main parameters
+	ini-config "$smb_conf" global << AD_MAIN_PARAMS
+	security = ads
+	realm = $domain
+	workgroup = $workgroup
+	netbios name = $hostname
+	encrypt passwords = true
+	dns proxy = no
+	socket options = TCP_NODELAY
+	template shell = /bin/bash
+	winbind use default domain = yes
+	winbind refresh tickets = yes
+AD_MAIN_PARAMS
 
-    # Other parameters
-    #smb_param "idmap config * : range" "10000-20000"
-    #smb_param "idmap config * : backend" tdb
-    #smb_param "winbind enum users" yes
-    #smb_param "winbind enum groups" yes
-    #smb_param "domain master" no
-    #smb_param "local master" no
-    #smb_param "preferred master" no
-    #smb_param "os level" 0
-    #smb_param "domain logons" no
-    #smb_param "load printers" no
-    #smb_param "show add printer wizard" no
-    #smb_param "printcap name" /dev/null
-    #smb_param "disable spoolss" yes
+	# Other parameters
+	if [ -n '' ] ; then
+	ini-config "$smb_conf" global << AD_ADDITIONAL_PARAMS
+	idmap config * : range = "10000-20000"
+	idmap config * : backend = tdb
+	winbind enum users = yes
+	winbind enum groups = yes
+	domain master = no
+	local master = no
+	preferred master = no
+	os level = 0
+	domain logons = no
+	load printers = no
+	show add printer wizard = no
+	printcap name = /dev/null
+	disable spoolss = yes
+AD_ADDITIONAL_PARAMS
+	fi
 }
 
 
