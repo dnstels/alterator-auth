@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+
+use Config::IniFiles;
+
+$config = shift;
+$section = shift;
+
+$cfg = Config::IniFiles->new( -file => $config );
+
+foreach $line ( <STDIN> ) {
+    chomp( $line );
+	my ( $name, $value ) = split( '=', $line );
+	$name  =~ s/^\s+|\s+$//g;
+	$value =~ s/^\s+|\s+$//g;
+	#print "[$section] $name = $value\n";
+	$cfg->newval( $section, $name, $value );
+}
+
+
+return 1 if $cfg->RewriteConfig() == undef;

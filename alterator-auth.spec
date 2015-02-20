@@ -27,6 +27,7 @@ Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
 BuildPreReq: alterator >= 4.7-alt4
+BuildRequires: perl-Config-IniFiles
 
 %description
 Alterator module for system wide auth settings
@@ -39,12 +40,14 @@ Alterator module for system wide auth settings
 
 %install
 %makeinstall
+install -Dpm755 bin/ini-config %buildroot/%_bindir/ini-config
 install -Dpm755 sbin/system-auth %buildroot/%_sbindir/system-auth
 install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 
 %files
 %_datadir/alterator/applications/*
 %_datadir/alterator/ui/*/
+%_bindir/ini-config
 %_sbindir/system-auth
 %_hooksdir/90-auth
 %_alterator_backend3dir/*
@@ -55,6 +58,7 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 - Do not require ldap-user-tools for list local configured LDAP DNs (ALT #24180)
 - Fix fatal exit in backend if avahi-daemon is not running
 - Fix typo (ALT #25930)
+- Package ini-config helper for set parameters in ini files
 
 * Thu Jan 24 2013 Andrey Cherepanov <cas@altlinux.org> 0.25-alt3
 - Fix system-auth write with nss-ldapd
