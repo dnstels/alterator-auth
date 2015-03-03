@@ -341,11 +341,6 @@ EOF.
     kdestroy
 }
 
-# Disable service of old scheme
-current="$(/usr/sbin/control system-auth)"
-[ "$current" = "ldap" -o "$current" = "krb5" ] && disable_service nslcd
-[ "$current" = "winbind" ] && disable_service winbind
-
 action="$1" ; shift
 [ $# -ge 1 ] && object="$1" && shift
 
@@ -357,7 +352,12 @@ case "$action" in
         list
     ;;
     write)
-    case "$object" in
+	  # Disable service of old scheme
+	  current="$(/usr/sbin/control system-auth)"
+	  [ "$current" = "ldap" -o "$current" = "krb5" ] && disable_service nslcd
+	  [ "$current" = "winbind" ] && disable_service winbind
+
+	  case "$object" in
         local)
             write_profile "$object"
         ;;
@@ -390,7 +390,7 @@ case "$action" in
         *)
             fatal "unknown auth type $object"
         ;;
-    esac
+      esac
     ;;
     *)
         echo "$0 action [object]"
