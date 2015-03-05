@@ -23,6 +23,7 @@ nsswitchfile="/etc/nsswitch.conf"
 
 . alterator-sh-functions
 . alterator-openldap-functions
+. alterator-service-functions
 . shell-config
 . shell-quote
 
@@ -145,6 +146,17 @@ get_ldap()
 		write_string_param ldap_basedn "$(read_ldap2 base)"
 }
 
+get_ad()
+{
+		read auth_type domain hostname workgroup << EOF
+$(/usr/sbin/system-auth status)
+EOF
+		#echo "auth: a=$auth_type d=$domain h=$hostname w=$workgroup" >&2
+		write_string_param ad_domain    "$domain"
+		write_string_param ad_host      "$hostname"
+		write_string_param ad_workgroup "$workgroup"
+}
+
 on_message()
 {
 	case "$in_action" in
@@ -162,9 +174,18 @@ on_message()
 		    get_ldap
 		    write_string_param current_domain "$(read_current)"
 		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
+		    [ "$auth_type" = "ad" ] && get_ad
+
+		    # Test for services available
+		    srv="false"
+		    service_control avahi-daemon is-active && srv="true"
+		    write_bool_param "service_avahi" "$srv"
+		    srv="false"
+		    service_exists winbind && srv="true"
+		    write_bool_param "service_winbind" "$srv"
 		    ;;
 	    write)
-            #echo "$(set|grep -a "in_")" >&2
+            echo "$(set|grep -a "in_")" >&2
             case "$in_auth_type" in
                 local)
                     /usr/sbin/system-auth write local
@@ -183,13 +204,17 @@ on_message()
 				auth_type=krb5
 			fi
                         ldap_uri="ldaps://"
-                        [ -n "$in_domain" ] && /usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" || fatal "$(_ "Domain not set")"		    
+                        [ -n "$in_domain" ] && /usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" || fatal "$(_ "Domain not set")"
                     fi
                     ;;
                 multi)
                     ;;
                 pkcs11)
                     ;;
+		ad)
+		    output="$(/usr/sbin/system-auth write ad "$in_ad_domain" "$in_ad_host" "$in_ad_workgroup" "$in_ad_username" "$in_ad_password" 2>&1)"
+		    echo "$output" | grep "^Joined '.*' to dns domain '.*'$" || write_error "`_ "Unable to access to Active Directory domain:"` $output"
+		    ;;
                 *)
                     ;;
             esac

@@ -3,14 +3,19 @@
 ;;; Functions
 (define (update-domain)
   (let ((domain (form-value "domain")))
-    (form-update-visibility '("domain_name") (string=? domain "custom"))))
+    (form-update-visibility '("domain_name") (string=? domain "custom")))
+  (let ((auth-type (form-value "auth-type")))
+    (alt-group activity (string=? auth-type "krb5"))
+    (ad-group  activity (string=? auth-type "ad"))))
 
 (define (ui-commit)
   (catch/message
     (lambda()
       (apply woo-write
 	     "/auth"
-	     "ldap_ssl" "on" "auth_type" "krb5" (form-value-list))
+	     "ldap_ssl" "on"
+	     "auth_type" (form-value "auth-type")
+	     (form-value-list))
       (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
 
 (define (ui-init)
@@ -23,38 +28,84 @@
         (lambda(reason) 
                 (avahi-warning visibility #t)
             ))
-    (form-update-value "domain" (woo-get-option data 'current_domain))
-    (update-domain)))
+	;;; show warnings
+    (avahi-warning   visibility (not (woo-get-option data 'service_avahi)))
+	(winbind-warning visibility (not (woo-get-option data 'service_winbind)))
+
+    ;;; fill fields
+	(form-update-value "domain" (woo-get-option data 'current_domain))
+
+    (form-update-value "auth-type"    (woo-get-option data 'auth_type))
+    (form-update-value "ad_domain"    (woo-get-option data 'ad_domain))
+    (form-update-value "ad_host"      (woo-get-option data 'ad_host))
+    (form-update-value "ad_workgroup" (woo-get-option data 'ad_workgroup))
+
+    (update-domain)
+
+    ))
 
 ;;; UI
 (gridbox
-    columns "0;100"
+    columns "100"
     margin 50
 
-    (label text (_ "Current domain:") align "right")
-    (label name "current_domain")
 
-    (label colspan 2)
+    (label text (_ "Current domain:") align "right" visibility #f)
+    (label name "current_domain" visibility #f)
 
-    (document:id domain-list-label (label text (_ "Domain list:") align "right"))
-    (document:id domain-list (combobox name "domain"))
+    ;;; Local database
+    (radio name "auth-type" value "local" text (_ "Local database") state #t)
 
-    ;;; Warning if avahi-daemon is out of gear
-    (document:id avahi-warning 
-        (label colspan 2 text (string-append (bold (_ "Warning: "))
-		 	    							 (_ "Search for domains is impossible because avahi-daemon is not started"))
-                         visibility #f))
-    (edit name "domain_name" visibility #t)
-    (checkbox colspan 2 text(_"Use cached credentials for out of domain login") name "ccreds")    
+    ;;; ALT domain
+    (radio name "auth-type" value "krb5" text (_ "ALT Linux domain"))
+
+        (document:id alt-group (gridbox columns "0;100" margin 10
+
+        ;;; Warning if avahi-daemon is out of gear
+        (document:id avahi-warning (label colspan 2 visibility #f
+	     text (string-append (bold (_ "Warning: ")) (_ "Search for domains is impossible because avahi-daemon is not started"))))
+
+        (document:id domain-list-label (label text (_ "Domain list:")))
+        (document:id domain-list (combobox name "domain"))
+
+        (edit name "domain_name" visibility #t)
+        (checkbox colspan 2 text(_"Use cached credentials for out of domain login") name "ccreds")))
+
+    ;;; Active Directory
+    (radio name "auth-type" value "ad" text (_ "Active Directory domain"))
+
+        (document:id ad-group (gridbox columns "0;100" margin 10
+
+	;;; Warning if samba-winbind is unavailabe
+	(document:id winbind-warning (label colspan 2 visibility #f
+	    text (string-append (bold (_ "Warning: ")) (_ "Unable to find winbind service. Please, install package samba-winbind and try again."))))
+
+	(label text (_ "Domain:"))
+	(edit name "ad_domain")
+
+	(label text (_ "Workgroup:"))
+	(edit name "ad_workgroup")
+
+	(label text (_ "Netbios name:"))
+	(edit name "ad_host")
+
+	;; Active Directory administrator authentication
+	(label text (_ "Administrator name:"))
+	(gridbox columns "33;33;33"
+	    (edit name "ad_username")
+	    (label align "right" text (_ "Administrator password:"))
+	    (edit name "ad_password" echo "stars"))
+
+    ))
+
     (spacer)
-    
-    (label colspan 2)
 
-	(document:id change-attention 
-        (label colspan 2 text (string-append (bold (_ "Attention: "))
-		 	                                 (_ "Domain change needs reboot for normal operation"))))
+    (label)
 
-    (label colspan 2)
+    (groupbox title (_ "Attention: ")
+	(label text (_ "Domain change needs reboot for normal operation")))
+
+    (label)
     (if (global 'frame:next)
     (label)
     (hbox align "left"
@@ -66,6 +117,7 @@
 (document:root
   (when loaded
     (ui-init)
+    (form-bind "auth-type" "change" update-domain)
     (form-bind "domain" "change" update-domain)))
 
 (frame:on-back (thunk (or (ui-commit) 'cancel)))
