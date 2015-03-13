@@ -8,14 +8,30 @@
     (alt-group activity (string=? auth-type "krb5"))
     (ad-group  activity (string=? auth-type "ad"))))
 
+;;; Show warning if field is empty
+(define (check-empty-field field name)
+  (if (string=? (form-value field) "")
+      (woo-error (string-append (_ "Please, fill field ") name))))
+
+;;; Check for empty values if Active Directory setting up
+(define (ad-check-values)
+  (if (string=? (form-value "auth-type") "ad")
+      (begin
+          (check-empty-field "ad_domain"   (_ "Domain"))
+          (check-empty-field "ad_host"     (_ "Netbios name"))
+          (check-empty-field "ad_username" (_ "Administrator name"))
+          (check-empty-field "ad_password" (_ "Administrator password")))))
+
 (define (ui-commit)
   (catch/message
     (lambda()
+      (ad-check-values)
       (apply woo-write
 	     "/auth"
 	     "ldap_ssl" "on"
 	     "auth_type" (form-value "auth-type")
 	     (form-value-list))
+      (form-update-value "ad_password" "")
       (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
 
 (define (ui-init)
@@ -39,6 +55,11 @@
     (form-update-value "ad_domain"    (woo-get-option data 'ad_domain))
     (form-update-value "ad_host"      (woo-get-option data 'ad_host))
     (form-update-value "ad_workgroup" (woo-get-option data 'ad_workgroup))
+
+
+    ;;; Fill fields
+    (if (string=? (form-value "ad_host") "")
+        (form-update-value "ad_host" (woo-get-option data 'hostname)))
 
     (update-domain)
 
@@ -92,7 +113,7 @@
 	;; Active Directory administrator authentication
 	(label text (_ "Administrator name:"))
 	(gridbox columns "33;33;33"
-	    (edit name "ad_username")
+	    (edit name "ad_username" value "Administrator")
 	    (label align "right" text (_ "Administrator password:"))
 	    (edit name "ad_password" echo "stars"))
 

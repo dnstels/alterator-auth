@@ -332,13 +332,25 @@ kdc = $domain
 EOF.
 
     # Get Kerberos ticket for administrator
-    echo "$password" | kinit "$user@$domain" >/dev/null
+    output="$(echo "$password" | kinit "$user@$domain" 2>&1 >/dev/null)"
+    if [ "$?" -ne 0 ]; then
+	#echo "ERROR: $output"
+	error_unknown_kdc="$(echo "$output"|grep '^kinit: Cannot contact any KDC for realm')"
+	error_bad_username="$(echo "$output"|grep '^kinit: Client not found in Kerberos database while getting initial credentials$')"
+	error_bad_credentials="$(echo "$output"|grep '^kinit: Preauthentication failed while getting initial credentials$')"
+	[ -n "$error_unknown_kdc" ] && echo "Cannot contact KDC for realm" >&2
+	[ -n "$error_bad_username" ] && echo "Unknown administrator name" >&2
+	[ -n "$error_bad_credentials" ] && echo "Wrong password" >&2
+	return 1
+    else
+	# Join to domain
+	net ads join -U"$user%$password" | grep -v '^Using short domain name'
 
-    # Join to domain
-    net ads join -U"$user%$password"
+	[ "$?" -ne 0 ] && return 1
 
-    # Destroy ticket
-    kdestroy
+	# Destroy ticket
+	kdestroy &>/dev/null
+    fi
 }
 
 action="$1" ; shift
@@ -381,6 +393,7 @@ case "$action" in
                 write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
                 join_ad_domain "$1" "$4" "$5"
+                [ "$?" -ne 0 ] && exit 1
                 # prepare winbind service
                 enable_service winbind
             else
