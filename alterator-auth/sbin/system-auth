@@ -21,6 +21,9 @@ krb5_conf="/etc/krb5.conf"
 # samba conf
 smb_conf="/etc/samba/smb.conf"
 
+# time sync command
+net_time="net time set -S"
+
 #select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
@@ -406,7 +409,7 @@ case "$action" in
                 write_2_ldap base "$1"
                 write_2_ldap uri "$2"
                 # if nss-ldapd is used, restart daemon
-				enable_service nslcd
+		enable_service nslcd
             else
                 exit 1
             fi
@@ -415,6 +418,8 @@ case "$action" in
             if  test -n "$1" ;then
                 init
                 write_profile "$object"
+		# Sync time with DC before join
+		$net_time "$1" &>/dev/null
                 # Store configuration parameters: domain [hostname] [workgroup]
                 write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
