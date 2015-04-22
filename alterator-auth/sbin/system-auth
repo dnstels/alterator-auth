@@ -416,6 +416,7 @@ case "$action" in
         ;;
         ad)
             if  test -n "$1" ;then
+	    	test -x "/usr/bin/net" || fatal "Cannot find /usr/bin/net executable required to join to Active Directory domain"
                 init
                 write_profile "$object"
 		# Sync time with DC before join
