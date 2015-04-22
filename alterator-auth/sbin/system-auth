@@ -353,6 +353,32 @@ EOF.
     fi
 }
 
+usage() {
+    cat << USAGE.
+Usage: system-auth action [object...]
+Show or change system authentication scheme.
+
+Actions:
+status     show current authentication information
+list       list available authentication schemes
+write      set authentication parameters
+--version  Show current program verision
+
+Examples:
+Show current authentication information
+  system-auth status
+
+Use local authentication
+  system-auth write local
+
+Use LDAP authentication
+  system-auth write ldap dc=domain,dc=name ldap://127.0.0.1
+
+Use Active Directory authentication
+  system-auth write ad domain.name host workgroup Administrator password
+USAGE.
+}
+
 action="$1" ; shift
 [ $# -ge 1 ] && object="$1" && shift
 
@@ -405,8 +431,11 @@ case "$action" in
         ;;
       esac
     ;;
+    --version)
+        rpm -q alterator-auth --qf '%{version}\n'
+	;;
     *)
-        echo "$0 action [object]"
-    ;;
+	usage
+	;;
 esac
 
