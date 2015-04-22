@@ -44,9 +44,11 @@
         (lambda(reason) 
                 (avahi-warning visibility #t)
             ))
-	;;; show warnings
+    ;;; show warnings
     (avahi-warning   visibility (not (woo-get-option data 'service_avahi)))
-	(winbind-warning visibility (not (woo-get-option data 'service_winbind)))
+    (alt-group-type  activity   (woo-get-option data 'service_avahi))
+    (winbind-warning visibility (not (woo-get-option data 'service_winbind)))
+    (ad-group-type   activity   (woo-get-option data 'service_winbind))
 
     ;;; fill fields
 	(form-update-value "domain" (woo-get-option data 'current_domain))
@@ -78,7 +80,7 @@
     (radio name "auth-type" value "local" text (_ "Local database") state #t)
 
     ;;; ALT domain
-    (radio name "auth-type" value "krb5" text (_ "ALT Linux domain"))
+    (document:id alt-group-type (radio name "auth-type" value "krb5" text (_ "ALT Linux domain")))
 
         (document:id alt-group (gridbox columns "0;100" margin 10
 
@@ -93,7 +95,7 @@
         (checkbox colspan 2 text(_"Use cached credentials for out of domain login") name "ccreds")))
 
     ;;; Active Directory
-    (radio name "auth-type" value "ad" text (_ "Active Directory domain"))
+    (document:id ad-group-type (radio name "auth-type" value "ad" text (_ "Active Directory domain")))
 
         (document:id ad-group (gridbox columns "0;100" margin 10
 
