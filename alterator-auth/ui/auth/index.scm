@@ -3,10 +3,7 @@
 ;;; Functions
 (define (update-domain)
   (let ((domain (form-value "domain")))
-    (form-update-visibility '("domain_name") (string=? domain "custom")))
-  (let ((auth-type (form-value "auth-type")))
-    (alt-group activity (string=? auth-type "krb5"))
-    (ad-group  activity (string=? auth-type "ad"))))
+    (form-update-visibility '("domain_name") (string=? domain "custom"))))
 
 ;;; Show warning if field is empty
 (define (check-empty-field field name)
@@ -45,13 +42,19 @@
                 (avahi-warning visibility #t)
             ))
     ;;; show warnings
-    (avahi-warning   visibility (not (woo-get-option data 'service_avahi)))
-    (alt-group-type  activity   (woo-get-option data 'service_avahi))
-    (winbind-warning visibility (not (woo-get-option data 'service_winbind)))
-    (ad-group-type   activity   (woo-get-option data 'service_winbind))
+    (if (not (woo-get-option data 'service_avahi))
+      (begin
+        (avahi-warning  visibility  #t)
+        (alt-group-type activity    #f)
+        (alt-group      activity    #f)))
+    (if (not (woo-get-option data 'service_winbind))
+      (begin
+        (winbind-warning visibility #t)
+        (ad-group-type   activity   #f)
+        (ad-group        activity   #f)))
 
     ;;; fill fields
-	(form-update-value "domain" (woo-get-option data 'current_domain))
+    (form-update-value "domain" (woo-get-option data 'current_domain))
 
     (form-update-value "auth-type"    (woo-get-option data 'auth_type))
     (form-update-value "ad_domain"    (woo-get-option data 'ad_domain))
