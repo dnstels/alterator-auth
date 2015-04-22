@@ -22,7 +22,7 @@ krb5_conf="/etc/krb5.conf"
 smb_conf="/etc/samba/smb.conf"
 
 # time sync command
-net_time="net time set -S"
+net_cmd="/usr/bin/net"
 
 #select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
@@ -315,7 +315,7 @@ join_ad_domain()
     local password="$3"
 
     [ -x /usr/bin/kinit ] || fatal "krb5-kinit is required for join to Active Directory domain"
-    [ -x /usr/bin/net ] || fatal "samba-common is required for join to Active Directory domain"
+    [ -x "$net_cmd" ] || fatal "$net_cmd from samba-common or samba-common-tools package is required for join to Active Directory domain"
     [ -e /etc/init.d/winbind ] || fatal "samba-winbind is required for join to Active Directory domain"
 
     # Prepare Kerberos environment
@@ -347,7 +347,7 @@ EOF.
 	return 1
     else
 	# Join to domain
-	net ads join -U"$user%$password" | grep -v '^Using short domain name'
+	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
 
 	[ "$?" -ne 0 ] && return 1
 
@@ -416,11 +416,11 @@ case "$action" in
         ;;
         ad)
             if  test -n "$1" ;then
-	    	test -x "/usr/bin/net" || fatal "Cannot find /usr/bin/net executable required to join to Active Directory domain"
+		test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
                 init
                 write_profile "$object"
 		# Sync time with DC before join
-		$net_time "$1" &>/dev/null
+		$net_cmd time set -S "$1" &>/dev/null
                 # Store configuration parameters: domain [hostname] [workgroup]
                 write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
