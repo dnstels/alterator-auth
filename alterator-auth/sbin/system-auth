@@ -256,17 +256,17 @@ write_ad_conf()
 	winbind refresh tickets = yes
 	winbind enum users = yes
 	winbind enum groups = yes
-AD_MAIN_PARAMS
-
-	# Other parameters
-	if [ -n '' ] ; then
-	ini-config "$smb_conf" global << AD_ADDITIONAL_PARAMS
-	idmap config * : range = "10000-20000"
+	idmap config * : range = 10000-20000
 	idmap config * : backend = tdb
 	domain master = no
 	local master = no
 	preferred master = no
 	os level = 0
+AD_MAIN_PARAMS
+
+	# Other parameters
+	if [ -n '' ] ; then
+	ini-config "$smb_conf" global << AD_ADDITIONAL_PARAMS
 	domain logons = no
 	load printers = no
 	show add printer wizard = no
