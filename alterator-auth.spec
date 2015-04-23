@@ -2,7 +2,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.28
+Version: 0.29
 Release: alt1
 
 BuildArch: noarch
@@ -55,6 +55,12 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %_alterator_backend3dir/*
 
 %changelog
+* Thu Apr 23 2015 Andrey Cherepanov <cas@altlinux.org> 0.29-alt1
+- Enable service settime-rfc867 for ALT domain
+- Add settime-rfc867 to requirements
+- Support both sysvinit and systemd services
+
+
 * Wed Apr 22 2015 Andrey Cherepanov <cas@altlinux.org> 0.28-alt1
 - Sync time with DC before join to Active Directory domain
 - Check available of /usr/bin/net for join to AD
