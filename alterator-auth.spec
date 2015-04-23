@@ -20,6 +20,8 @@ Requires: pam-config >= 1.7.0-alt1
 Requires: pam_krb5
 Requires: nss-ldap
 Requires: avahi-daemon
+Requires: settime-rfc867
+
 Conflicts: alterator-fbi < 5.9-alt2
 Conflicts: alterator-lookout < 1.6-alt6
 
