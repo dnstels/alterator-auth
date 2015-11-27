@@ -270,16 +270,16 @@ MAPPING_PARAMS_SAMBA4)"
 	winbind refresh tickets = yes
 	winbind enum users = yes
 	winbind enum groups = yes
-	$MAPPING_PARAMS
+$MAPPING_PARAMS
 	domain master = no
 	local master = no
 	preferred master = no
 	os level = 0
-	; domain logons = no
-	; load printers = no
-	; show add printer wizard = no
-	; printcap name = /dev/null
-	; disable spoolss = yes
+;	domain logons = no
+;	load printers = no
+;	show add printer wizard = no
+;	printcap name = /dev/null
+;	disable spoolss = yes
 AD_PARAMS)"
 	
 	# Replace entire section [global] in /etc/samba/smb.conf by new config
