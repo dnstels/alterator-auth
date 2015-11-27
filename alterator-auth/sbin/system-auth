@@ -242,6 +242,20 @@ write_ad_conf()
 	# Prepare file for write parameters
 	test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
 
+	# Mapping paraments for Samba < 4
+	if [ -n "$(/usr/sbin/winbindd --version|grep '^Version 3\.')" ] ; then
+	    MAPPING_PARAMS="$(cat << MAPPING_PARAMS_SAMBA3
+        idmap uid = 10000-20000
+        idmap gid = 10000-20000
+        idmap backend = tdb
+MAPPING_PARAMS_SAMBA3)"
+	else
+	    MAPPING_PARAMS="$(cat << MAPPING_PARAMS_SAMBA4
+        idmap config * : range = 10000-20000
+        idmap config * : backend = tdb
+MAPPING_PARAMS_SAMBA4)"
+	fi
+
 	# Write main parameters
 	ini-config "$smb_conf" global << AD_PARAMS
 	security = ads
@@ -256,8 +270,7 @@ write_ad_conf()
 	winbind refresh tickets = yes
 	winbind enum users = yes
 	winbind enum groups = yes
-	idmap config * : range = 10000-20000
-	idmap config * : backend = tdb
+	$MAPPING_PARAMS
 	domain master = no
 	local master = no
 	preferred master = no
