@@ -42,14 +42,12 @@ Alterator module for system wide auth settings
 
 %install
 %makeinstall
-install -Dpm755 bin/ini-config %buildroot/%_bindir/ini-config
 install -Dpm755 sbin/system-auth %buildroot/%_sbindir/system-auth
 install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 
 %files
 %_datadir/alterator/applications/*
 %_datadir/alterator/ui/*/
-%_bindir/ini-config
 %_sbindir/system-auth
 %_hooksdir/90-auth
 %_alterator_backend3dir/*
