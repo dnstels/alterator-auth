@@ -257,7 +257,7 @@ MAPPING_PARAMS_SAMBA4)"
 	fi
 
 	# Write main parameters
-	ini-config "$smb_conf" global << AD_PARAMS
+	CONFIG="$(cat << AD_PARAMS
 	security = ads
 	realm = $domain
 	workgroup = $workgroup
@@ -280,8 +280,10 @@ MAPPING_PARAMS_SAMBA4)"
 	; show add printer wizard = no
 	; printcap name = /dev/null
 	; disable spoolss = yes
-AD_PARAMS
-
+AD_PARAMS)"
+	
+	# Replace entire section [global] in /etc/samba/smb.conf by new config
+	sed -i -e "/^\[global\]/,/^\[/ {/^\([^[]\|$\)/d};/^\[global\]/a\\`echo "$CONFIG"|sed ':a;{N;s/\n/\\\\n/};ba'`" "$smb_conf"
 }
 
 
