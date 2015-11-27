@@ -243,7 +243,7 @@ write_ad_conf()
 	test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
 
 	# Write main parameters
-	ini-config "$smb_conf" global << AD_MAIN_PARAMS
+	ini-config "$smb_conf" global << AD_PARAMS
 	security = ads
 	realm = $domain
 	workgroup = $workgroup
@@ -262,18 +262,13 @@ write_ad_conf()
 	local master = no
 	preferred master = no
 	os level = 0
-AD_MAIN_PARAMS
+	; domain logons = no
+	; load printers = no
+	; show add printer wizard = no
+	; printcap name = /dev/null
+	; disable spoolss = yes
+AD_PARAMS
 
-	# Other parameters
-	if [ -n '' ] ; then
-	ini-config "$smb_conf" global << AD_ADDITIONAL_PARAMS
-	domain logons = no
-	load printers = no
-	show add printer wizard = no
-	printcap name = /dev/null
-	disable spoolss = yes
-AD_ADDITIONAL_PARAMS
-	fi
 }
 
 
