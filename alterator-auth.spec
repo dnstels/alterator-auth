@@ -29,7 +29,6 @@ Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
 BuildPreReq: alterator >= 4.7-alt4
-BuildRequires: perl-Config-IniFiles
 
 %description
 Alterator module for system wide auth settings
