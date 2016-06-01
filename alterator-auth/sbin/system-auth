@@ -24,6 +24,9 @@ smb_conf="/etc/samba/smb.conf"
 # time sync command
 net_cmd="/usr/bin/net"
 
+# workgroup
+WORKGROUP=""
+
 #select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
@@ -238,6 +241,7 @@ write_ad_conf()
 	domain="$(upper $domain)"
 	hostname="$(upper $hostname)"
 	workgroup="$(upper $workgroup)"
+	WORKGROUP="$workgroup"
 
 	# Prepare file for write parameters
 	test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
@@ -329,21 +333,13 @@ join_ad_domain()
     [ -x "$net_cmd" ] || fatal "$net_cmd from samba-common or samba-common-tools package is required for join to Active Directory domain"
     [ -e /etc/init.d/winbind ] || fatal "samba-winbind is required for join to Active Directory domain"
 
-    # Prepare Kerberos environment
-    local i="$shell_ini_config_prefix"
-    export shell_ini_config_prefix=''
-    ini_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
-    export shell_ini_config_prefix="$i"
-
-    # Remove realms section
-    sed -i '/^\[realms\]/,/^\[/{//!d};/^\[realms\]/d' "$krb5_conf"
-    # Add realm
-    cat >> "$krb5_conf" << EOF.
-[realms]
-$domain = {
-kdc = $domain
-}
-EOF.
+    # Prepare Kerberos environment: restart winbind and get ready krb5.conf from /var/lib/samba/smb_krb5
+    service winbind restart
+    local new_krb5_conf="/var/lib/samba/smb_krb5/krb5.conf.$WORKGROUP"
+    if [ -e "$new_krb5_conf" ]; then
+	    rm -f "$krb5_conf"
+	    cp "$new_krb5_conf" "$krb5_conf"
+    fi
 
     # Get Kerberos ticket for administrator
     output="$(echo "$password" | kinit "$user@$domain" 2>&1 >/dev/null)"
