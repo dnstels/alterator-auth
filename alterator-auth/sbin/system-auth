@@ -267,6 +267,7 @@ MAPPING_PARAMS_SAMBA4)"
 	winbind refresh tickets = yes
 	winbind enum users = yes
 	winbind enum groups = yes
+	wins support = yes
 $MAPPING_PARAMS
 ;	encrypt passwords = true
 ;	dns proxy = no
