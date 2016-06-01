@@ -1,0 +1,6 @@
+TODO
+
+- [Active Directory] Setup SSO mount CIFS share via gvfs and pam_mount
+- [Active Directory] Animation during login and dialogbox on succesful login in domain
+- [Active Directory] Move admin username and password to separate dialog
+- Login to Active Directory in web interface
