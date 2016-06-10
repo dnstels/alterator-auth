@@ -160,12 +160,12 @@ write_profile()
 	ldap|krb5*)
 	    write_nsswitch "passwd" "files ldap"
 	    write_nsswitch "shadow" "tcb files ldap"
-	    write_nsswitch "group" "files ldap"
+	    write_nsswitch "group" "files [SUCCESS=merge] ldap"
 	    ;;
 	ad)
 	    write_nsswitch "passwd" "files winbind"
 	    write_nsswitch "shadow" "tcb files winbind"
-	    write_nsswitch "group" "files winbind"
+	    write_nsswitch "group" "files [SUCCESS=merge] winbind"
 	    ;;
     esac
 }
