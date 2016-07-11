@@ -10,6 +10,11 @@
   (if (string=? (form-value field) "")
       (woo-error (string-append (_ "Please, fill field ") name))))
 
+;;; Check netbios name lenght
+(define (check-netbios-name)
+  (if (> (string-length (form-value "ad_host")) 15)
+      (woo-error (_ "Netbios name should not be more 15 chars"))))
+
 ;;; Check for empty values if Active Directory setting up
 (define (ad-check-values)
   (if (string=? (form-value "auth-type") "ad")
@@ -17,7 +22,8 @@
           (check-empty-field "ad_domain"   (_ "Domain"))
           (check-empty-field "ad_host"     (_ "Netbios name"))
           (check-empty-field "ad_username" (_ "Administrator name"))
-          (check-empty-field "ad_password" (_ "Administrator password")))))
+          (check-empty-field "ad_password" (_ "Administrator password"))
+          (check-netbios-name))))
 
 (define (ui-commit)
   (catch/message
@@ -29,7 +35,8 @@
 	     "auth_type" (form-value "auth-type")
 	     (form-value-list))
       (form-update-value "ad_password" "")
-      (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
+      (form-update-value-list '("current_domain") (woo-read-first "/auth")
+      (document:popup-information (string-append (_ "Welcome to the ") (form-value "ad_domain") (_ " domain.")) 'ok)))))
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))

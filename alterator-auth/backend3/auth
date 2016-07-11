@@ -220,6 +220,7 @@ on_message()
                     ;;
 		ad)
 		    output="$(/usr/sbin/system-auth write ad "$in_ad_domain" "$in_ad_host" "$in_ad_workgroup" "$in_ad_username" "$in_ad_password" 2>&1)"
+		    [ "$output" = "Netbios name should not be more 15 chars" ] && output="`_ "Netbios name should not be more 15 chars"`"
 		    [ "$output" = "Cannot contact KDC for realm" ] && output="`_ "Cannot contact KDC for realm"`"
 		    [ "$output" = "Unknown administrator name" ] && output="`_ "Unknown administrator name"`"
 		    [ "$output" = "Wrong password" ] && output="`_ "Wrong password"`"
