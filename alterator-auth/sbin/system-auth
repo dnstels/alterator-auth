@@ -279,6 +279,7 @@ MAPPING_PARAMS_SAMBA4)"
 	winbind enum users = yes
 	winbind enum groups = yes
 	winbind refresh tickets = yes
+	winbind offline logon = yes
 	wins support = yes
 $MAPPING_PARAMS
 ;	encrypt passwords = true
@@ -297,6 +298,15 @@ AD_PARAMS)"
 	
 	# Replace entire section [global] in /etc/samba/smb.conf by new config
 	sed -i -e "/^\[global\]/,/^\[/ {/^\([^[]\|$\)/d};/^\[global\]/a\\`echo "$CONFIG"|sed ':a;{N;s/\n/\\\\n/};ba'`" "$smb_conf"
+
+	# Support offline login and set more usable parameters for pam_winbind
+	. shell-ini-config
+	shell_ini_config_prefix=''
+	pam_winbind_cfg='/etc/security/pam_winbind.conf'
+	ini_config_set "$pam_winbind_cfg" 'global' 'cached_login' 'yes'
+	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
+	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'FILE'
+	ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
 }
 
 
