@@ -343,9 +343,11 @@ disable_service() {
 # Join to Active Directory domin
 join_ad_domain()
 {
-    local domain="$(upper $1)"
+    local ldomain="$1"
+    local domain="$(upper $ldomain)"
     local user="$2"
     local password="$3"
+    local host_name="$4"
 
     [ -x /usr/bin/kinit ] || fatal "krb5-kinit is required for join to Active Directory domain"
     [ -x "$net_cmd" ] || fatal "$net_cmd from samba-common or samba-common-tools package is required for join to Active Directory domain"
@@ -375,6 +377,11 @@ join_ad_domain()
 	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
 
 	[ "$?" -ne 0 ] && return 1
+
+	# Register machine in domain DNS
+	if [ -n "$host_name" ]; then
+		$net_cmd ads dns register -U"$user%$password" $host_name.$ldomain
+	fi
 
 	# Destroy ticket
 	kdestroy &>/dev/null
@@ -451,7 +458,7 @@ case "$action" in
                 # Store configuration parameters: domain [hostname] [workgroup]
                 write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
-                join_ad_domain "$1" "$4" "$5"
+                join_ad_domain "$1" "$4" "$5" "$2"
                 [ "$?" -ne 0 ] && exit 1
                 # prepare winbind service
                 enable_service winbind
