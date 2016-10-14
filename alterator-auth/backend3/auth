@@ -192,7 +192,7 @@ on_message()
 		    write_bool_param "service_winbind" "$srv"
 		    ;;
 	    write)
-            echo "$(set|grep -a "in_")" >&2
+            #echo "$(set|grep -a "in_")" >&2
             case "$in_auth_type" in
                 local)
                     /usr/sbin/system-auth write local
@@ -211,7 +211,12 @@ on_message()
 				auth_type=krb5
 			fi
                         ldap_uri="ldaps://"
-                        [ -n "$in_domain" ] && /usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" || fatal "$(_ "Domain not set")"
+                        if [ -n "$in_domain" ]; then
+				err="$(/usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" 2>&1)"
+				if [ $? -ne 0 ]; then
+					write_error "`_ "Domain not set:"` $err"
+				fi
+			fi
                     fi
                     ;;
                 multi)
