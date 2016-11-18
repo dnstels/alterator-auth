@@ -356,9 +356,19 @@ join_ad_domain()
     # Prepare Kerberos environment: restart winbind and get ready krb5.conf from /var/lib/samba/smb_krb5
     service winbind restart
     local new_krb5_conf="/var/lib/samba/smb_krb5/krb5.conf.$WORKGROUP"
+    # Wait 10 seconds for winbind to create krb5.conf file
+    for s in $(seq 10); do
+	    if [ -e "$new_krb5_conf" ]; then
+		break
+	    fi
+	    sleep 1
+    done
+    # Check generated krb5.conf
     if [ -e "$new_krb5_conf" ]; then
 	    rm -f "$krb5_conf"
 	    cp "$new_krb5_conf" "$krb5_conf"
+    else
+	    fatal "unable to get Kerberos configuration of domain"
     fi
 
     # Get Kerberos ticket for administrator
