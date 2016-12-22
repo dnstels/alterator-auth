@@ -32,6 +32,7 @@ admin_groups="/etc/alterator/auth/admin-groups"
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
 
+. alterator-datetime-functions
 . shell-config
 . shell-ini-config
 . shell-quote
@@ -323,6 +324,10 @@ AD_PARAMS)"
 
 	# Map domain groups to local Unix groups
 	set_domain_group_mapping
+
+	# Set time sync from dc for client
+	write_pool "$domain"
+	write_ntp_status "#t"
 }
 
 

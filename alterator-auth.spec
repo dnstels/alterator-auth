@@ -46,6 +46,7 @@ Requires: krb5-kinit
 Requires: pam_mount
 Requires: libnss-role
 Requires: fuse-gvfs gvfs-backend-smb gvfs-utils
+Requires: alterator-datetime
 
 %description -n task-auth-ad
 Metapackage to authenticate in Active Directory domain.
