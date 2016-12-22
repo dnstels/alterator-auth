@@ -389,6 +389,7 @@ $domain = {
 kdc = $domain
 }
 EOF.
+    chmod 0644 "$krb5_conf"
 
     # Get Kerberos ticket for administrator
     output="$(echo "$password" | kinit "$user@$domain" 2>&1 >/dev/null)"
