@@ -58,10 +58,14 @@ Metapackage to authenticate in Active Directory domain.
 
 %install
 %makeinstall
+install -Dpm644 etc/user-groups %buildroot%_sysconfdir/alterator/auth/user-groups
+install -Dpm644 etc/admin-groups %buildroot%_sysconfdir/alterator/auth/admin-groups
 install -Dpm755 sbin/system-auth %buildroot/%_sbindir/system-auth
 install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 
 %files
+%config(noreplace) %_sysconfdir/alterator/auth/user-groups
+%config(noreplace) %_sysconfdir/alterator/auth/admin-groups
 %_datadir/alterator/applications/*
 %_datadir/alterator/ui/*/
 %_sbindir/system-auth

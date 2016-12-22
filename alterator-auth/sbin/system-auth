@@ -24,6 +24,10 @@ smb_conf="/etc/samba/smb.conf"
 # time sync command
 net_cmd="/usr/bin/net"
 
+# group mapping
+user_groups="/etc/alterator/auth/user-groups"
+admin_groups="/etc/alterator/auth/admin-groups"
+
 #select between nss_ldap and nss-ldapd
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
@@ -224,6 +228,19 @@ upper()
     echo -n "$1" | tr '[[:lower:]]' '[[:upper:]]'
 }
 
+set_domain_group_mapping()
+{
+	# Check if libnss-role is installed
+	if ! rpm -q libnss-role >/dev/null ; then
+		return
+	fi
+	groupadd -r admins &>/dev/null
+	roleadd users `cat $user_groups`
+	roleadd admins `cat $admin_groups`
+	roleadd 'Domain Users' users
+	roleadd 'Domain Admins' admins
+}
+
 write_ad_conf()
 {
 	local domain="$1"
@@ -303,6 +320,9 @@ AD_PARAMS)"
 	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
 	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'FILE'
 	ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
+
+	# Map domain groups to local Unix groups
+	set_domain_group_mapping
 }
 
 
