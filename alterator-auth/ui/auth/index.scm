@@ -109,9 +109,9 @@
 
         (document:id ad-group (gridbox columns "0;100" margin 10
 
-	;;; Warning if samba-winbind is unavailabe
+	;;; Warning if task-auth-ad is unavailabe
 	(document:id winbind-warning (label colspan 2 visibility #f
-	    text (string-append (bold (_ "Warning: ")) (_ "Unable to find winbind service. Please, install package samba-winbind and try again."))))
+	    text (string-append (bold (_ "Warning: ")) (_ "Package task-auth-ad in not installed. Authentication in Active Directory is not available."))))
 
 	(label text (_ "Domain:"))
 	(edit name "ad_domain")

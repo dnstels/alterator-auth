@@ -188,7 +188,7 @@ on_message()
 		    service_control avahi-daemon is-active && srv="true"
 		    write_bool_param "service_avahi" "$srv"
 		    srv="false"
-		    service_exists winbind && srv="true"
+		    rpm -q task-auth-ad &>/dev/null && srv="true"
 		    write_bool_param "service_winbind" "$srv"
 		    ;;
 	    write)
