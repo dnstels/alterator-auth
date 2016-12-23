@@ -246,6 +246,16 @@ set_domain_group_mapping()
 	roleadd 'Domain Admins' admins
 }
 
+adapt_dm()
+{
+	if [ -e /etc/lightdm/lightdm.conf ]; then
+		ini_config_set /etc/lightdm/lightdm.conf "SeatDefaults" "greeter-hide-users" "true"
+	fi
+	if [ -e /etc/lightdm/lightdm-gtk-greeter.conf ]; then
+		ini_config_set /etc/lightdm/lightdm-gtk-greeter.conf "greeter" "show-language-selector" "false"
+	fi
+}
+
 write_ad_conf()
 {
 	local domain="$1"
@@ -332,6 +342,9 @@ AD_PARAMS)"
 	# Set time sync from dc for client
 	write_pool "$domain"
 	write_ntp_status "#t"
+
+	# Adapt DM for too many domain users
+	adapt_dm
 }
 
 
