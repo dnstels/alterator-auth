@@ -236,7 +236,7 @@ upper()
 set_domain_group_mapping()
 {
 	# Check if libnss-role is installed
-	if ! rpm -q libnss-role >/dev/null ; then
+	if [ ! -x /usr/bin/rolelst ]; then
 		return
 	fi
 	groupadd -r admins &>/dev/null
