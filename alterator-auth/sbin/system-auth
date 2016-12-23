@@ -167,7 +167,11 @@ write_profile()
 	ad)
 	    write_nsswitch "passwd" "files winbind"
 	    write_nsswitch "shadow" "tcb files winbind"
-	    write_nsswitch "group" "files [SUCCESS=merge] winbind"
+	    if [ -x /usr/bin/rolelst ]; then
+	        write_nsswitch "group" "files [SUCCESS=merge] role winbind"
+	    else
+	        write_nsswitch "group" "files [SUCCESS=merge] winbind"
+	    fi
 	    ;;
     esac
 }
