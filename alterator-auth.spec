@@ -2,7 +2,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.29.7
+Version: 0.30.0
 Release: alt1
 
 BuildArch: noarch
@@ -76,6 +76,19 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-ad
 
 %changelog
+* Mon Dec 26 2016 Andrey Cherepanov <cas@altlinux.org> 0.30.0-alt1
+- Edit existing Kerberos configuration instead of use winbind to
+  retrieve Kerberos config (ALT #32342, #32937)
+- Set winbind enum users and groups to `no` to prevent lags in large
+  networks
+- Check task-auth-ad package installed instead of winbind service to
+  get complete list of requirements
+- Map domain groups to local Unix groups
+- Add gvfs stuff to task-auth-ad for shares mount
+- Set time sync from dc for client
+- Adapt LightDM for too many domain users: remove user list and language
+  chooser (such as Windows login screen)
+
 * Fri Nov 18 2016 Andrey Cherepanov <cas@altlinux.org> 0.29.7-alt1
 - Wait 10 seconds for winbind to create krb5.conf file (ALT #32759)
 
