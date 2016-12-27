@@ -168,7 +168,7 @@ write_profile()
 	    write_nsswitch "passwd" "files winbind"
 	    write_nsswitch "shadow" "tcb files winbind"
 	    if [ -x /usr/bin/rolelst ]; then
-	        write_nsswitch "group" "files [SUCCESS=merge] role winbind"
+	        write_nsswitch "group" "files [SUCCESS=merge] winbind role"
 	    else
 	        write_nsswitch "group" "files [SUCCESS=merge] winbind"
 	    fi
@@ -239,14 +239,16 @@ set_domain_group_mapping()
 	if [ ! -x /usr/bin/rolelst ]; then
 		return
 	fi
-	groupadd -r admins &>/dev/null
+	groupadd -r localadmins &>/dev/null
+	if [ -e /etc/role ]; then
+		/bin/mv -f /etc/role /etc/role.old
+		touch /etc/role
+	fi
 	roleadd users `cat $user_groups`
-	roleadd admins `cat $admin_groups`
-	# Add domain groups with default GID
-	users_gid="$(sed -n 's/^users:x:\([0-9]\+\):.*/\1/p' /etc/group)"
-	echo "10000:$users_gid" >> /etc/role
-	admins_gid="$(sed -n 's/^admins:x:\([0-9]\+\):.*/\1/p' /etc/group)"
-	echo "10005:$admins_gid" >> /etc/role
+	roleadd localadmins `cat $admin_groups`
+	# Add domain groups by its name
+	echo "Domain Users:users" >> /etc/role
+	echo "Domain Admins:localadmins" >> /etc/role
 }
 
 adapt_dm()
