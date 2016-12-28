@@ -233,6 +233,11 @@ upper()
     echo -n "$1" | tr '[[:lower:]]' '[[:upper:]]'
 }
 
+lower()
+{
+    echo -n "$1" | tr '[[:upper:]]' '[[:lower:]]'
+}
+
 set_domain_group_mapping()
 {
 	# Check if libnss-role is installed
@@ -338,8 +343,11 @@ AD_PARAMS)"
 	pam_winbind_cfg='/etc/security/pam_winbind.conf'
 	ini_config_set "$pam_winbind_cfg" 'global' 'cached_login' 'yes'
 	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
-	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'FILE'
+	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'KEYRING'
 	ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
+
+	# Remove krb5_ccache_type=FILE from /etc/pam.d/system-auth-winbind
+	sed -i 's/ krb5_ccache_type=FILE//g' /etc/pam.d/system-auth-winbind
 
 	# Map domain groups to local Unix groups
 	set_domain_group_mapping
@@ -425,6 +433,12 @@ EOF.
 	[ -n "$error_bad_credentials" ] && echo "Wrong password" >&2
 	return 1
     else
+	# Set correct FQDN
+	FQDN="$(lower "$host_name.$ldomain")"
+	shell_config_set "/etc/sysconfig/network" "HOSTNAME" "$FQDN"
+	hostname "$FQDN"
+	[ -x "/usr/bin/hostnamectl" ] && hostnamectl set-hostname "$FQDN"
+
 	# Join to domain
 	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
 
@@ -432,7 +446,7 @@ EOF.
 
 	# Register machine in domain DNS
 	if [ -n "$host_name" ]; then
-		$net_cmd ads dns register -U"$user%$password" $host_name.$ldomain
+		$net_cmd ads dns register -U"$user%$password" "$FQDN"
 	fi
 
 	# Destroy ticket
