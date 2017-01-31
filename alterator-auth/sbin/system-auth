@@ -264,9 +264,11 @@ adapt_dm()
 {
 	if [ -e /etc/lightdm/lightdm.conf ]; then
 		ini_config_set /etc/lightdm/lightdm.conf "SeatDefaults" "greeter-hide-users" "true"
+		chmod a+r /etc/lightdm/lightdm.conf
 	fi
 	if [ -e /etc/lightdm/lightdm-gtk-greeter.conf ]; then
 		ini_config_set /etc/lightdm/lightdm-gtk-greeter.conf "greeter" "show-language-selector" "false"
+		chmod a+r /etc/lightdm/lightdm-gtk-greeter.conf
 	fi
 }
 
@@ -349,6 +351,7 @@ AD_PARAMS)"
 	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
 	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'KEYRING'
 	ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
+	chmod a+r "$pam_winbind_cfg"
 
 	# Remove krb5_ccache_type=FILE from /etc/pam.d/system-auth-winbind
 	sed -i 's/ krb5_ccache_type=FILE//g' /etc/pam.d/system-auth-winbind
@@ -423,7 +426,7 @@ $domain = {
 kdc = $domain
 }
 EOF.
-    chmod 0644 "$krb5_conf"
+    chmod a+r "$krb5_conf"
 
     # Get Kerberos ticket for administrator
     output="$(echo "$password" | kinit "$user@$domain" 2>&1 >/dev/null)"
