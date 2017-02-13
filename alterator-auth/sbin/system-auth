@@ -24,6 +24,9 @@ smb_conf="/etc/samba/smb.conf"
 # time sync command
 net_cmd="/usr/bin/net"
 
+# sssd config
+sssd_conf="/etc/sssd/sssd.conf"
+
 # group mapping
 user_groups="/etc/alterator/auth/user-groups"
 admin_groups="/etc/alterator/auth/admin-groups"
@@ -56,7 +59,7 @@ get_status()
         krb5*)
             echo -n "$status " && pam_ldap_info
         ;;
-        winbind)
+        winbind|sss)
             echo -n "ad " && pam_ad_info
 		;;
         *)
@@ -81,8 +84,8 @@ list()
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libkrb5.so.*')" ] &&
 	echo "krb5" 
 
-    # checking winbind libs
-    [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_winbind.*')" ] &&
+    # checking winbind or sss libs
+    [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -regextype egrep -regex '.*/pam_(winbind|sss).so')" ] &&
 	echo "ad"
 }
 
@@ -151,26 +154,33 @@ read_config()
 write_profile()
 {
     local scheme="$1"
-	[ "$scheme" = "ad" ] && scheme="winbind"
-    /usr/sbin/control system-auth "$scheme" &&
-    case "$1" in
+
+    case "$scheme" in
 	local)
+	    /usr/sbin/control system-auth local
 	    write_nsswitch "passwd" "files"
 	    write_nsswitch "shadow" "tcb files"
 	    write_nsswitch "group" "files"
 	    ;;
 	ldap|krb5*)
+	    /usr/sbin/control system-auth "$scheme"
 	    write_nsswitch "passwd" "files ldap"
 	    write_nsswitch "shadow" "tcb files ldap"
 	    write_nsswitch "group" "files [SUCCESS=merge] ldap"
 	    ;;
 	ad)
-	    write_nsswitch "passwd" "files winbind"
-	    write_nsswitch "shadow" "tcb files winbind"
-	    if [ -x /usr/bin/rolelst ]; then
-	        write_nsswitch "group" "files [SUCCESS=merge] winbind role"
+	    if [ -e "$sssd_conf" ]; then
+		scheme="sss"
 	    else
-	        write_nsswitch "group" "files [SUCCESS=merge] winbind"
+		scheme="winbind"
+	    fi
+            /usr/sbin/control system-auth "$scheme"
+	    write_nsswitch "passwd" "files $scheme"
+	    write_nsswitch "shadow" "tcb files $scheme"
+	    if [ -x /usr/bin/rolelst ]; then
+	        write_nsswitch "group" "files [SUCCESS=merge] $scheme role"
+	    else
+	        write_nsswitch "group" "files [SUCCESS=merge] $scheme"
 	    fi
 	    ;;
     esac
@@ -297,7 +307,7 @@ write_ad_conf()
 	test -e "$smb_conf.orig" || cp "$smb_conf" "$smb_conf.orig"
 
 	# Mapping paraments for Samba < 4
-	if [ -n "$(/usr/sbin/winbindd --version|grep '^Version 3\.')" ] ; then
+	if [ -n "$(rpm -qf /etc/samba/smb.conf --qf="%{version}"|grep '^3\.')" ] ; then
 	    MAPPING_PARAMS="$(cat << MAPPING_PARAMS_SAMBA3
         idmap uid = 10000-20000000
         idmap gid = 10000-20000000
@@ -310,6 +320,18 @@ MAPPING_PARAMS_SAMBA3)"
 MAPPING_PARAMS_SAMBA4)"
 	fi
 
+	if [ -e "$sssd_conf" ]; then
+	    WINBIND_PARAMS=""
+	else
+	    MAPPING_PARAMS="$(cat << MAPPING_PARAMS_WINBIND
+	winbind use default domain = yes
+	winbind enum users = no
+	winbind enum groups = no
+	winbind refresh tickets = yes
+	winbind offline logon = yes
+MAPPING_PARAMS_WINBIND)"
+	fi
+
 	# Write main parameters
 	CONFIG="$(cat << AD_PARAMS
 	security = ads
@@ -319,12 +341,8 @@ MAPPING_PARAMS_SAMBA4)"
 	template shell = /bin/bash
 	kerberos method = system keytab
 	dedicated keytab file = /etc/krb5.keytab
-	winbind use default domain = yes
-	winbind enum users = no
-	winbind enum groups = no
-	winbind refresh tickets = yes
-	winbind offline logon = yes
 	wins support = yes
+$WINBIND_PARAMS
 $MAPPING_PARAMS
 ;	encrypt passwords = true
 ;	dns proxy = no
@@ -343,19 +361,30 @@ AD_PARAMS)"
 	# Replace entire section [global] in /etc/samba/smb.conf by new config
 	sed -i -e "/^\[global\]/,/^\[/ {/^\([^[]\|$\)/d};/^\[global\]/a\\`echo "$CONFIG"|sed ':a;{N;s/\n/\\\\n/};ba'`" "$smb_conf"
 
-	# Support offline login and set more usable parameters for pam_winbind
+	# Set parameters for PAM modules
 	. shell-ini-config
 	shell_ini_config_prefix=''
-	pam_winbind_cfg='/etc/security/pam_winbind.conf'
-	ini_config_set "$pam_winbind_cfg" 'global' 'cached_login' 'yes'
-	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
-	ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'KEYRING'
-	ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
-	chmod a+r "$pam_winbind_cfg"
+	if [ -e "$sssd_conf" ]; then
+	    ini_config_set "$sssd_conf" 'sssd' 'services' 'nss, pam'
+	    ini_config_set "$sssd_conf" 'sssd' 'domains' "$domain"
+	    ini_config_set "$sssd_conf" "$domain" 'id_provider' 'ad'
+	    ini_config_set "$sssd_conf" "$domain" 'auth_provider' 'ad'
+	    ini_config_set "$sssd_conf" "$domain" 'chpass_provider' 'ad'
+	    ini_config_set "$sssd_conf" "$domain" 'default_shell' '/bin/bash'
+	    ini_config_set "$sssd_conf" "$domain" 'fallback_homedir' '/home/%d/%u'
+	    ini_config_set "$sssd_conf" "$domain" 'debug_level' '0'
+            chmod a+r "$sssd_conf"
+	else
+	    pam_winbind_cfg='/etc/security/pam_winbind.conf'
+	    ini_config_set "$pam_winbind_cfg" 'global' 'cached_login' 'yes'
+	    ini_config_set "$pam_winbind_cfg" 'global' 'krb5_auth' 'yes'
+	    ini_config_set "$pam_winbind_cfg" 'global' 'krb5_ccache_type' 'KEYRING'
+	    ini_config_set "$pam_winbind_cfg" 'global' 'silent' 'yes'
+            chmod a+r "$pam_winbind_cfg"
 
-	# Remove krb5_ccache_type=FILE from /etc/pam.d/system-auth-winbind
-	sed -i 's/ krb5_ccache_type=FILE//g' /etc/pam.d/system-auth-winbind
-
+	    # Remove krb5_ccache_type=FILE from /etc/pam.d/system-auth-winbind
+	    sed -i 's/ krb5_ccache_type=FILE//g' /etc/pam.d/system-auth-winbind
+	fi
 	# Map domain groups to local Unix groups
 	set_domain_group_mapping
 
@@ -409,7 +438,7 @@ join_ad_domain()
 
     [ -x /usr/bin/kinit ] || fatal "krb5-kinit is required for join to Active Directory domain"
     [ -x "$net_cmd" ] || fatal "$net_cmd from samba-common or samba-common-tools package is required for join to Active Directory domain"
-    [ -e /etc/init.d/winbind ] || fatal "samba-winbind is required for join to Active Directory domain"
+    [ -n "$(ls /etc/init.d/{winbind,sssd})" ] || fatal "samba-winbind or sssd-ad is required for join to Active Directory domain"
 
     # Prepare Kerberos environment
     local i="$shell_ini_config_prefix"
@@ -503,6 +532,7 @@ case "$action" in
 	  [ "$current" = "ldap" -o "$current" = "krb5" ] && disable_service nslcd
 	  [ "$current" = "ldap" -o "$current" = "krb5" ] && disable_service settime-rfc867
 	  [ "$current" = "winbind" ] && disable_service winbind
+	  [ "$current" = "sss" ] && disable_service sssd
 
 	  case "$object" in
         local)
@@ -533,8 +563,12 @@ case "$action" in
                 # Join computer to domain
                 join_ad_domain "$1" "$4" "$5" "$2"
                 [ "$?" -ne 0 ] && exit 1
-                # prepare winbind service
-                enable_service winbind
+                # prepare auth service
+		if [ -e "$sssd_conf" ]; then
+			enable_service sssd
+		else
+			enable_service winbind
+		fi
             else
                 exit 1
             fi
