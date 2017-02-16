@@ -109,9 +109,9 @@
 
         (document:id ad-group (gridbox columns "0;100" margin 10
 
-	;;; Warning if task-auth-ad is unavailabe
+	;;; Warning if task-auth-ad and task-auth-ad-sssd is unavailable
 	(document:id winbind-warning (label colspan 2 visibility #f
-	    text (string-append (bold (_ "Warning: ")) (_ "Package task-auth-ad in not installed. Authentication in Active Directory is not available."))))
+	    text (string-append (bold (_ "Warning: ")) (_ "Neither task-auth-ad nor task-auth-ad-sssd is installed. Authentication in Active Directory is not available."))))
 
 	(label text (_ "Domain:"))
 	(edit name "ad_domain")
