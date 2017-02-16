@@ -367,13 +367,13 @@ AD_PARAMS)"
 	if [ -e "$sssd_conf" ]; then
 	    ini_config_set "$sssd_conf" 'sssd' 'services' 'nss, pam'
 	    ini_config_set "$sssd_conf" 'sssd' 'domains' "$domain"
-	    ini_config_set "$sssd_conf" "$domain" 'id_provider' 'ad'
-	    ini_config_set "$sssd_conf" "$domain" 'auth_provider' 'ad'
-	    ini_config_set "$sssd_conf" "$domain" 'chpass_provider' 'ad'
-	    ini_config_set "$sssd_conf" "$domain" 'default_shell' '/bin/bash'
-	    ini_config_set "$sssd_conf" "$domain" 'fallback_homedir' '/home/%d/%u'
-	    ini_config_set "$sssd_conf" "$domain" 'debug_level' '0'
-            chmod a+r "$sssd_conf"
+	    ini_config_set "$sssd_conf" "domain/$domain" 'id_provider' 'ad'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'auth_provider' 'ad'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'chpass_provider' 'ad'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'default_shell' '/bin/bash'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'fallback_homedir' '/home/%d/%u'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'debug_level' '0'
+            chmod 0600 "$sssd_conf"
 	else
 	    pam_winbind_cfg='/etc/security/pam_winbind.conf'
 	    ini_config_set "$pam_winbind_cfg" 'global' 'cached_login' 'yes'
