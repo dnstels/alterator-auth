@@ -66,6 +66,20 @@ Requires: gvfs-shares
 %description -n task-auth-ad-sssd
 Metapackage to authenticate in Active Directory domain by SSSD.
 
+%package -n task-auth-freeipa
+Summary: Metapackage to authenticate in FreeIPA domain
+Group: System/Configuration/Other
+Requires: alterator-auth
+Requires: freeipa-client
+Requires: krb5-kinit
+Requires: pam_mount
+Requires: libnss-role
+Requires: alterator-datetime
+Requires: gvfs-shares
+
+%description -n task-auth-freeipa
+Metapackage to authenticate in FreeIPA domain.
+
 %prep
 %setup -q
 
@@ -91,6 +105,8 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-ad
 
 %files -n task-auth-ad-sssd
+
+%files -n task-auth-freeipa
 
 %changelog
 * Mon Feb 13 2017 Andrey Cherepanov <cas@altlinux.org> 0.31-alt1
