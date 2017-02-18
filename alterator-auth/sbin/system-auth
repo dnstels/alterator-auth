@@ -24,6 +24,9 @@ smb_conf="/etc/samba/smb.conf"
 # time sync command
 net_cmd="/usr/bin/net"
 
+# FreeIPA client command
+ipa_cmd="/usr/sbin/ipa-client-install"
+
 # sssd config
 sssd_conf="/etc/sssd/sssd.conf"
 
@@ -60,6 +63,8 @@ get_status()
             echo -n "$status " && pam_ldap_info
         ;;
         winbind|sss)
+            # TODO: possible FreeIPA join
+            # pam_ipa_info
             echo -n "ad " && pam_ad_info
 		;;
         *)
@@ -87,6 +92,10 @@ list()
     # checking winbind or sss libs
     [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -regextype egrep -regex '.*/pam_(winbind|sss).so')" ] &&
 	echo "ad"
+
+	# checking freeipa-client executable
+	[ -x '/usr/sbin/ipa-client-install' ] &&
+	echo "freeipa"
 }
 
 pam_ldap_info()
@@ -110,6 +119,11 @@ pam_ad_info()
 	local hostname="$(ini_config_get "$smb_conf" "global" "netbios name")"
 	local workgroup="$(ini_config_get "$smb_conf" "global" "workgroup")"
     echo "$domain $hostname $workgroup"
+}
+
+pam_ipa_info()
+{
+    # TODO pam_ipa_info()
 }
 
 check_uri()
@@ -427,6 +441,17 @@ disable_service() {
     fi
 }
 
+# Set correct FQDN
+set_hostname()
+{
+    local FQDN="$(lower "$1")"
+    if [ -n "$FQDN" ]; then
+        shell_config_set "/etc/sysconfig/network" "HOSTNAME" "$FQDN"
+        hostname "$FQDN"
+        [ -x "/usr/bin/hostnamectl" ] && hostnamectl set-hostname "$FQDN"
+    fi
+}
+
 # Join to Active Directory domin
 join_ad_domain()
 {
@@ -470,10 +495,7 @@ EOF.
 	return 1
     else
 	# Set correct FQDN
-	FQDN="$(lower "$host_name.$ldomain")"
-	shell_config_set "/etc/sysconfig/network" "HOSTNAME" "$FQDN"
-	hostname "$FQDN"
-	[ -x "/usr/bin/hostnamectl" ] && hostnamectl set-hostname "$FQDN"
+	set_hostname "$host_name.$ldomain"
 
 	# Join to domain
 	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
@@ -488,6 +510,34 @@ EOF.
 	# Destroy ticket
 	kdestroy &>/dev/null
     fi
+}
+
+# Join FreeIPA domain
+join_ipa_domain()
+{
+    local domain_name="$1"
+    local host_name="$2"
+    local admin_name="$3"
+    local admin_password="$4"
+    local log="/tmp/freeipa-join-$(date +%d.%m.%Y-%H:%M:%S)-$domain_name.log"
+
+    # Begin log
+    date > "$log"
+    echo "Domain: $domain_name" >> "$log"
+    echo >> "$log"
+
+    # Set hostname
+    set_hostname "$host_name.$domain_name"
+
+    # Uninstall old join
+    ipa-client-install -U --uninstall &>/dev/null
+
+    # Join to domain
+    $ipa_cmd -U --domain "$domain_name" -p "$admin_name" -w "$admin_password" >> "$log" 2>&1
+
+    echo "Finished at $(date)" >> "$log"
+
+    ret=$?
 }
 
 usage() {
@@ -513,6 +563,9 @@ Use LDAP authentication
 
 Use Active Directory authentication
   system-auth write ad domain.name host workgroup Administrator password
+
+Use FreeIPA authentication
+  system-auth write freeipa domain.name host admin password
 USAGE.
 }
 
@@ -537,7 +590,7 @@ case "$action" in
 	  case "$object" in
         local)
             write_profile "$object"
-        ;;
+            ;;
         ldap|krb5*)
             if  check_basedn "$1" && check_uri "$2"  ;then
                 init
@@ -545,34 +598,46 @@ case "$action" in
                 write_2_ldap base "$1"
                 write_2_ldap uri "$2"
                 # if nss-ldapd is used, restart daemon
-		enable_service nslcd
-		enable_service settime-rfc867
+                enable_service nslcd
+                enable_service settime-rfc867
             else
                 exit 1
             fi
-        ;;
+            ;;
         ad)
             if  test -n "$1" ;then
-		test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
+                test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
                 init
                 write_profile "$object"
-		# Sync time with DC before join
-		$net_cmd time set -S "$1" &>/dev/null
+                # Sync time with DC before join
+                $net_cmd time set -S "$1" &>/dev/null
                 # Store configuration parameters: domain [hostname] [workgroup]
                 write_ad_conf "$1" "$2" "$3"
                 # Join computer to domain
                 join_ad_domain "$1" "$4" "$5" "$2"
                 [ "$?" -ne 0 ] && exit 1
                 # prepare auth service
-		if [ -e "$sssd_conf" ]; then
-			enable_service sssd
-		else
-			enable_service winbind
-		fi
+                if [ -e "$sssd_conf" ]; then
+                    enable_service sssd
+                else
+                    enable_service winbind
+                fi
             else
                 exit 1
             fi
-		;;
+            ;;
+        freeipa)
+            if  test -n "$1" ;then
+                test -x "$ipa_cmd" || fatal "Cannot find $ipa_cmd executable required to join to FreeIPA domain"
+                join_ipa_domain "$1" "$2" "$3" "$4"
+                [ "$?" -ne 0 ] && exit 1
+                # prepare auth service
+                enable_service sssd
+            else
+                exit 1
+            fi
+            ;;
+
         *)
             fatal "unknown auth type $object"
         ;;
