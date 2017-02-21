@@ -53,48 +53,51 @@ get_status()
     local status="$(/usr/sbin/control system-auth)"
 
     case "$status" in
-        local) 
+        local)
             echo "local"
-        ;;
+	    ;;
         ldap)
             echo -n "ldap " && pam_ldap_info
-        ;;
+            ;;
         krb5*)
             echo -n "$status " && pam_ldap_info
-        ;;
+            ;;
         winbind|sss)
-            # TODO: possible FreeIPA join
-            # pam_ipa_info
-            echo -n "ad " && pam_ad_info
-		;;
+            # test FreeIPA join
+            if grep -q '^ipa_domain' "$sssd_conf"; then
+                echo -n "freeipa " && pam_ipa_info
+            else
+                echo -n "ad " && pam_ad_info
+            fi
+            ;;
         *)
             echo "unknown status"
-        ;;
+            ;;
     esac
 }
 
 list()
 {
     # always local
-    echo "local" 
-   
+    echo "local"
+
     # checking pam_ldap and libnss_ldap libs
     [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_ldap.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libnss_ldap.so.*')" ] &&
     echo "ldap"
-   
+
     # checking ldap and krb5 libs
     [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_ldap.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libnss_ldap.so.*')" ] &&
 	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libkrb5.so.*')" ] &&
-	echo "krb5" 
+	echo "krb5"
 
     # checking winbind or sss libs
     [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -regextype egrep -regex '.*/pam_(winbind|sss).so')" ] &&
 	echo "ad"
 
-	# checking freeipa-client executable
-	[ -x '/usr/sbin/ipa-client-install' ] &&
+    # checking freeipa-client executable
+    [ -x '/usr/sbin/ipa-client-install' ] &&
 	echo "freeipa"
 }
 
@@ -110,20 +113,23 @@ pam_ldap_info()
         basedn="$(read_nss_ldap base)"
     fi
 
-    check_uri "$uri" && check_basedn "$basedn" && echo "$basedn $uri" 
+    check_uri "$uri" && check_basedn "$basedn" && echo "$basedn $uri"
 }
 
 pam_ad_info()
 {
-	local domain="$(ini_config_get "$smb_conf" "global" "realm")"
-	local hostname="$(ini_config_get "$smb_conf" "global" "netbios name")"
-	local workgroup="$(ini_config_get "$smb_conf" "global" "workgroup")"
+    local domain="$(ini_config_get "$smb_conf" "global" "realm")"
+    local hostname="$(ini_config_get "$smb_conf" "global" "netbios name")"
+    local workgroup="$(ini_config_get "$smb_conf" "global" "workgroup")"
     echo "$domain $hostname $workgroup"
 }
 
 pam_ipa_info()
 {
-    # TODO pam_ipa_info()
+    local domain="$(sed -n 's/^ipa_domain *= *//p' "$sssd_conf")"
+    local hostname="$(sed -n 's/^ipa_hostname *= *//p' "$sssd_conf")"
+    hostname="${hostname//.$domain}"
+    echo "$domain $hostname"
 }
 
 check_uri()
@@ -142,7 +148,7 @@ check_basedn()
     local basedn="$1"
 
     [ -z "$basedn" ] && message "$0 (check_basedn) basedn not set" && return 1
-    
+
     [ -z "$(echo "$basedn"| egrep "^dc=[^,]+(,dc=[^,]+)*$")" ] && message "$0 (check_basedn) invalid basedn format" && return 1
 
     :
@@ -206,7 +212,7 @@ write_profile()
 
 write_nsswitch()
 {
-    write_config "$nsswitchfile" "$1:" "$2" 
+    write_config "$nsswitchfile" "$1:" "$2"
 }
 
 write_2_ldap()
@@ -371,7 +377,7 @@ $MAPPING_PARAMS
 ;	printcap name = /dev/null
 ;	disable spoolss = yes
 AD_PARAMS)"
-	
+
 	# Replace entire section [global] in /etc/samba/smb.conf by new config
 	sed -i -e "/^\[global\]/,/^\[/ {/^\([^[]\|$\)/d};/^\[global\]/a\\`echo "$CONFIG"|sed ':a;{N;s/\n/\\\\n/};ba'`" "$smb_conf"
 
