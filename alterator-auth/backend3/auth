@@ -39,9 +39,9 @@ host_2_dn()
 
 local_bases(){
     if [ -n "$in_ldap_host" ]; then
-	if test_bool "$in_ldap_ssl"; then 
-	    ldap_uri="ldaps://" 
-	else 
+	if test_bool "$in_ldap_ssl"; then
+	    ldap_uri="ldaps://"
+	else
 	    ldap_uri="ldap://"
 	fi
 	echo "$in_ldap_ssl: $ldap_uri$in_ldap_host" >> /root/alt_test.txt
@@ -159,7 +159,7 @@ EOF
 
 get_domain_from_dns()
 {
-	resolvconf -l 2>/dev/null | sed -n 's/^search //p'|sed 's/ localdomain//'
+	resolvconf -l 2>/dev/null | sed -n 's/^search //p'|sed 's/ localdomain//' | tr ' ' '\n' | head -1
 }
 
 on_message()
@@ -180,8 +180,11 @@ on_message()
 		    write_string_param current_domain "$(read_current)"
 		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
 		    write_string_param hostname "$(hostname -s)"
-		    [ "$auth_type" = "ad" ] && get_ad
-		    [ "$auth_type" = "ad" ] || write_string_param ad_domain "$(get_domain_from_dns)"
+		    if [ "$auth_type" = "ad" ]; then
+                get_ad
+            else
+                write_string_param ad_domain "$(get_domain_from_dns)"
+            fi
 
 		    # Test for services available
 		    srv="false"
@@ -190,7 +193,10 @@ on_message()
 		    srv="false"
 		    rpm -q task-auth-ad &>/dev/null && srv="true"
 		    rpm -q task-auth-ad-sssd &>/dev/null && srv="true"
-		    write_bool_param "service_winbind" "$srv"
+		    write_bool_param "type_ad_available" "$srv"
+            srv="false"
+		    rpm -q task-auth-freeipa &>/dev/null && srv="true"
+		    write_bool_param "type_freeipa_available" "$srv"
 		    ;;
 	    write)
             #echo "$(set|grep -a "in_")" >&2
