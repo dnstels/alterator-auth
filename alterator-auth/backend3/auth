@@ -171,7 +171,7 @@ EOF
 
 get_domain_from_dns()
 {
-	resolvconf -l 2>/dev/null | sed -n 's/^search //p'|sed 's/ localdomain//' | tr ' ' '\n' | head -1
+	resolvconf -l 2>/dev/null | sed -n 's/^\(domain\|search\) //p'|sed 's/ localdomain//' | tr ' ' '\n' | head -1
 }
 
 on_message()
