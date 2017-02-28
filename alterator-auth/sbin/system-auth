@@ -539,7 +539,7 @@ join_ipa_domain()
     ipa-client-install -U --uninstall &>/dev/null
 
     # Join to domain
-    $ipa_cmd -U --domain "$domain_name" -p "$admin_name" -w "$admin_password" >> "$log" 2>&1
+    $ipa_cmd -U --domain "$domain_name" -p "$admin_name" -w "$admin_password" 2>&1 | tee -a "$log"
 
     echo "Finished at $(date)" >> "$log"
 

@@ -16,24 +16,60 @@
       (woo-error (_ "Netbios name should not be more 15 chars"))))
 
 ;;; Check for empty values if Active Directory setting up
-(define (ad-check-values)
+(define (field-check-values)
   (if (string=? (form-value "auth-type") "ad")
       (begin
           (check-empty-field "ad_domain"   (_ "Domain"))
           (check-empty-field "ad_host"     (_ "Netbios name"))
-          (check-netbios-name))))
+          (check-netbios-name)))
+  (if (string=? (form-value "auth-type") "freeipa")
+      (begin
+          (check-empty-field "freeipa_domain"   (_ "Domain"))
+          (check-empty-field "freeipa_host"     (_ "Host name")))))
 
+(define (admin-cred-param name)
+  (if (list? (global 'admin-creds))
+      (cond-plistq name (global 'admin-creds) "")
+      ""))
+
+;;; Apply button
 (define (ui-commit)
+  (if (not (or (string=? (form-value "auth-type") "ad")
+               (string=? (form-value "auth-type") "freeipa") ))
+    ;;; For tcb and ALT Domain
+    (ui-commit-simple)
+    ;;; For Active Directory and FreeIPA
+    (catch/message
+      (lambda()
+        (field-check-values)
+        ;; Show admin credentials dialog for ad and freeipa
+        (set-global! 'admin-creds (form-popup "/auth/admin-password" 'domain-type (form-value "auth-type")))
+        (if (not (string=? (admin-cred-param 'admin_username) ""))
+          (begin
+            (apply woo-write
+                "/auth"
+                "ldap_ssl" "on"
+                "auth_type" (form-value "auth-type")
+                "admin_username" (admin-cred-param 'admin_username)
+                "admin_password" (admin-cred-param 'admin_password)
+                (form-value-list))
+            (form-update-value-list '("current_domain") (woo-read-first "/auth"))
+            ;;; Show welcome message for AD and FreeIPA
+            (document:popup-information (string-append (_ "Welcome to the ") (form-value "current_domain") (_ " domain.")) 'ok))))))
+  (ui-init))
+
+(define (ui-commit-simple)
   (catch/message
     (lambda()
-      (ad-check-values)
       (apply woo-write
-	     "/auth"
-	     "ldap_ssl" "on"
-	     "auth_type" (form-value "auth-type")
-	     (form-value-list))
-      (form-update-value-list '("current_domain") (woo-read-first "/auth")
-      (document:popup-information (string-append (_ "Welcome to the ") (form-value "ad_domain") (_ " domain.")) 'ok)))))
+         "/auth"
+         "ldap_ssl" "on"
+         "auth_type" (form-value "auth-type")
+         "admin_username" (admin-cred-param 'admin_username)
+         "admin_password" (admin-cred-param 'admin_password)
+         (form-value-list))
+      (form-update-value-list '("current_domain") (woo-read-first "/auth")))))
+
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
@@ -67,12 +103,11 @@
 
     (form-update-value "auth-type"    (woo-get-option data 'auth_type))
     (form-update-value "ad_domain"    (woo-get-option data 'ad_domain))
-    (form-update-value "ad_host"      (woo-get-option data 'ad_host))
+    (form-update-value "ad_host"      (woo-get-option data 'ad_host (woo-get-option data 'hostname)))
     (form-update-value "ad_workgroup" (woo-get-option data 'ad_workgroup))
 
-    ;;; Fill fields
-    (if (string=? (form-value "ad_host") "")
-        (form-update-value "ad_host" (woo-get-option data 'hostname)))
+    (form-update-value "freeipa_domain"    (woo-get-option data 'freeipa_domain))
+    (form-update-value "freeipa_host"      (woo-get-option data 'freeipa_host (woo-get-option data 'hostname)))
 
     (update-domain)
 
@@ -159,7 +194,6 @@
 	(spacer)
         ))
 
-    (spacer)
     (label)
 
     (groupbox columns "100" title (_ "Attention: ")

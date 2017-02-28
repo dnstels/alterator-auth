@@ -146,7 +146,7 @@ get_ldap()
 		write_string_param ldap_basedn "$(read_ldap2 base)"
 }
 
-get_ad()
+get_ad_info()
 {
 		read auth_type domain hostname workgroup << EOF
 $(/usr/sbin/system-auth status)
@@ -155,6 +155,16 @@ EOF
 		write_string_param ad_domain    "$domain"
 		write_string_param ad_host      "$hostname"
 		write_string_param ad_workgroup "$workgroup"
+}
+
+get_freeipa_info()
+{
+		read auth_type domain hostname << EOF
+$(/usr/sbin/system-auth status)
+EOF
+		#echo "auth: a=$auth_type d=$domain h=$hostname" >&2
+		write_string_param freeipa_domain    "$domain"
+		write_string_param freeipa_host      "$hostname"
 }
 
 get_domain_from_dns()
@@ -181,9 +191,14 @@ on_message()
 		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
 		    write_string_param hostname "$(hostname -s)"
 		    if [ "$auth_type" = "ad" ]; then
-                get_ad
+                get_ad_info
             else
                 write_string_param ad_domain "$(get_domain_from_dns)"
+            fi
+            if [ "$auth_type" = "freeipa" ]; then
+                get_freeipa_info
+            else
+                write_string_param freeipa_domain "$(get_domain_from_dns)"
             fi
 
 		    # Test for services available
@@ -212,32 +227,37 @@ on_message()
                     if [ "$in_domain" = "local" ]; then
                         /usr/sbin/system-auth write local
                     else
-			if [ "$in_ccreds" = "#t" ]; then
-				auth_type=krb5_ccreds
-			else
-				auth_type=krb5
-			fi
+                        if [ "$in_ccreds" = "#t" ]; then
+                            auth_type=krb5_ccreds
+                        else
+                            auth_type=krb5
+                        fi
                         ldap_uri="ldaps://"
                         if [ -n "$in_domain" ]; then
-				err="$(/usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" 2>&1)"
-				if [ $? -ne 0 ]; then
-					write_error "`_ "Domain not set:"` $err"
-				fi
-			fi
+                            err="$(/usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" 2>&1)"
+                            if [ $? -ne 0 ]; then
+                                write_error "`_ "Domain does not set:"` $err"
+                            fi
+                        fi
                     fi
                     ;;
                 multi)
                     ;;
                 pkcs11)
                     ;;
-		ad)
-		    output="$(/usr/sbin/system-auth write ad "$in_ad_domain" "$in_ad_host" "$in_ad_workgroup" "$in_ad_username" "$in_ad_password" 2>&1)"
-		    [ "$output" = "Netbios name should not be more 15 chars" ] && output="`_ "Netbios name should not be more 15 chars"`"
-		    [ "$output" = "Cannot contact KDC for realm" ] && output="`_ "Cannot contact KDC for realm"`"
-		    [ "$output" = "Unknown administrator name" ] && output="`_ "Unknown administrator name"`"
-		    [ "$output" = "Wrong password" ] && output="`_ "Wrong password"`"
-		    echo "$output" | grep "^Joined '.*' to dns domain '.*'$" || write_error "`_ "Unable to access to Active Directory domain:"` $output"
-		    ;;
+                ad)
+                    output="$(/usr/sbin/system-auth write ad "$in_ad_domain" "$in_ad_host" "$in_ad_workgroup" "$in_admin_username" "$in_admin_password" 2>&1)"
+                    [ "$output" = "Netbios name should not be more 15 chars" ] && output="`_ "Netbios name should not be more 15 chars"`"
+                    [ "$output" = "Cannot contact KDC for realm" ] && output="`_ "Cannot contact KDC for realm"`"
+                    [ "$output" = "Unknown administrator name" ] && output="`_ "Unknown administrator name"`"
+                    [ "$output" = "Wrong password" ] && output="`_ "Wrong password"`"
+                    echo "$output" | grep "^Joined '.*' to dns domain '.*'$" || write_error "`_ "Unable to join to Active Directory domain:"` $output"
+                    ;;
+                freeipa)
+                    output="$(/usr/sbin/system-auth write freeipa "$in_ad_domain" "$in_ad_host" "$in_admin_username" "$in_admin_password" 2>&1)"
+                    echo "$output" | grep "^Unable to find IPA Server to join" && output="`_ "Unable to find IPA Server to join"`"
+                    echo "$output" | grep "^Client configuration complete.$" || write_error "`_ "Unable to join to FreeIPA domain:"` $output"
+                    ;;
                 *)
                     ;;
             esac
