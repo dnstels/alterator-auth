@@ -155,6 +155,7 @@ EOF
 		write_string_param ad_domain    "$domain"
 		write_string_param ad_host      "$hostname"
 		write_string_param ad_workgroup "$workgroup"
+		write_string_param current_domain "$domain"
 }
 
 get_freeipa_info()
@@ -165,6 +166,7 @@ EOF
 		#echo "auth: a=$auth_type d=$domain h=$hostname" >&2
 		write_string_param freeipa_domain    "$domain"
 		write_string_param freeipa_host      "$hostname"
+		write_string_param current_domain    "$domain"
 }
 
 get_domain_from_dns()
@@ -187,7 +189,6 @@ on_message()
 		    auth_type="$(/usr/sbin/system-auth status |cut -f1 -d ' ')"
 		    write_string_param "auth_type" "$auth_type"
 		    get_ldap
-		    write_string_param current_domain "$(read_current)"
 		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
 		    write_string_param hostname "$(hostname -s)"
 		    if [ "$auth_type" = "ad" ]; then
@@ -199,8 +200,10 @@ on_message()
                 get_freeipa_info
             else
                 write_string_param freeipa_domain "$(get_domain_from_dns)"
+		if [ "$auth_type" != "ad" ]; then
+			write_string_param current_domain "$(read_current)"
+		fi
             fi
-
 		    # Test for services available
 		    srv="false"
 		    service_control avahi-daemon is-active && srv="true"
@@ -214,8 +217,8 @@ on_message()
 		    write_bool_param "type_freeipa_available" "$srv"
 		    ;;
 	    write)
-            #echo "$(set|grep -a "in_")" >&2
-            case "$in_auth_type" in
+              #echo "$(set|grep -a "in_")" >&2
+              case "$in_auth_type" in
                 local)
                     /usr/sbin/system-auth write local
                     ;;
@@ -260,8 +263,8 @@ on_message()
                     ;;
                 *)
                     ;;
-            esac
-            ;;
+              esac
+              ;;
 	esac
 }
 message_loop
