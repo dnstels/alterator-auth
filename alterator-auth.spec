@@ -2,7 +2,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.31
+Version: 0.32
 Release: alt1
 
 BuildArch: noarch
@@ -109,6 +109,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Tue Feb 28 2017 Andrey Cherepanov <cas@altlinux.org> 0.32-alt1
+- Support join to FreeIPA domain
+
 * Mon Feb 13 2017 Andrey Cherepanov <cas@altlinux.org> 0.31-alt1
 - Add new metapackage task-auth-ad-sssd for configure auth by SSSD
 - Support SSSD for auth in Active Directory
