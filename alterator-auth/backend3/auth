@@ -259,6 +259,7 @@ on_message()
                 freeipa)
                     output="$(/usr/sbin/system-auth write freeipa "$in_ad_domain" "$in_ad_host" "$in_admin_username" "$in_admin_password" 2>&1)"
                     echo "$output" | grep "^Unable to find IPA Server to join" && output="`_ "Unable to find IPA Server to join"`"
+                    echo "$output" | grep "Password incorrect while getting initial credentials" && output="`_ "Incorrect administrator password"`"
                     echo "$output" | grep "^Client configuration complete.$" || write_error "`_ "Unable to join to FreeIPA domain:"` $output"
                     ;;
                 *)

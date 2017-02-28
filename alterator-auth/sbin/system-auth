@@ -540,10 +540,13 @@ join_ipa_domain()
 
     # Join to domain
     $ipa_cmd -U --domain "$domain_name" -p "$admin_name" -w "$admin_password" 2>&1 | tee -a "$log"
+    ret=$?
+
+    # Fix nsswitch group param
+    subst 's/role sss$/sss role/' "$nsswitchfile"
 
     echo "Finished at $(date)" >> "$log"
-
-    ret=$?
+    return $ret
 }
 
 usage() {
