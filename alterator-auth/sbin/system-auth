@@ -97,7 +97,7 @@ list()
 	echo "ad"
 
     # checking freeipa-client executable
-    [ -x '/usr/sbin/ipa-client-install' ] &&
+    [ -x "$ipa_cmd" ] &&
 	echo "freeipa"
 }
 
@@ -536,7 +536,7 @@ join_ipa_domain()
     set_hostname "$host_name.$domain_name"
 
     # Uninstall old join
-    ipa-client-install -U --uninstall &>/dev/null
+    "$ipa_cmd" -U --uninstall &>/dev/null
 
     # Join to domain
     $ipa_cmd -U --domain "$domain_name" -p "$admin_name" -w "$admin_password" 2>&1 | tee -a "$log"
