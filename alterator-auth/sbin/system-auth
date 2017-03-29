@@ -474,19 +474,19 @@ join_ad_domain()
     # Prepare Kerberos environment
     local i="$shell_ini_config_prefix"
     export shell_ini_config_prefix=''
+    test -e "$krb5_conf" || touch "$krb5_conf"
     ini_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
+    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_kdc" "true"
+    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_realm" "false"
+    ini_config_set "$krb5_conf" "libdefaults" "default_ccache_name" "KEYRING:persistent:%{uid}"
+    # Prevent GSS failure in sssd (Server not found in Kerberos database)
+    ini_config_set "$krb5_conf" "libdefaults" "rdns" "false"
     export shell_ini_config_prefix="$i"
-
-    # Remove realms section
-    sed -i '/^\[realms\]/,/^\[/{//!d};/^\[realms\]/d' "$krb5_conf"
-    # Add realm
-    cat >> "$krb5_conf" << EOF.
-[realms]
-$domain = {
-kdc = $domain
-}
-EOF.
     chmod a+r "$krb5_conf"
+
+    # Remove local DNS from resolvconf
+    subst '/^name_servers=127.0.0.1/d' /etc/resolvconf.conf
+    resolvconf -u
 
     # Get Kerberos ticket for administrator
     output="$(echo "$password" | kinit "$user@$domain" 2>&1 >/dev/null)"
