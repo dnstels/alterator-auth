@@ -155,7 +155,7 @@
 
         ;;; Warning if task-auth-ad and task-auth-ad-sssd is unavailable
         (document:id type-ad-warning (gridbox colspan 4 columns "0;100" visibility #f (label text "   ") (label
-            text (string-append (bold (_ "Warning: ")) (_ "Neither task-auth-ad nor task-auth-ad-sssd is installed. Authentication in Active Directory is not available.")))))
+            text (string-append (bold (_ "Warning: ")) (_ "Package task-auth-ad-sssd is not installed. Authentication with Active Directory is not available. Package task-auth-ad is not enough because it uses non-recommended winbind.")))))
 
         (label text "   ")
         (label text (_ "Domain:"))
@@ -181,7 +181,7 @@
 
         ;;; Warning if task-auth-freeipa is unavailable
         (document:id type-freeipa-warning (gridbox colspan 4 columns "0;100" visibility #f (label text "   ") (label
-            text (string-append (bold (_ "Warning: ")) (_ "Package task-auth-freeipa is not installed. Authentication in FreeIPA is not available.")))))
+            text (string-append (bold (_ "Warning: ")) (_ "Package task-auth-freeipa is not installed. Authentication with FreeIPA is not available.")))))
 
         (label text "   ")
         (label text (_ "Domain:"))

@@ -209,7 +209,7 @@ on_message()
 		    service_control avahi-daemon is-active && srv="true"
 		    write_bool_param "service_avahi" "$srv"
 		    srv="false"
-		    rpm -q task-auth-ad &>/dev/null && srv="true"
+		    #rpm -q task-auth-ad &>/dev/null && srv="true"
 		    rpm -q task-auth-ad-sssd &>/dev/null && srv="true"
 		    write_bool_param "type_ad_available" "$srv"
             srv="false"
