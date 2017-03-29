@@ -64,7 +64,7 @@ get_status()
             ;;
         winbind|sss)
             # test FreeIPA join
-            if grep -q '^ipa_domain' "$sssd_conf"; then
+            if grep -q '^ipa_domain' "$sssd_conf" &>/dev/null; then
                 echo -n "freeipa " && pam_ipa_info
             else
                 echo -n "ad " && pam_ad_info
