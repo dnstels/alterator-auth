@@ -360,8 +360,7 @@ MAPPING_PARAMS_WINBIND)"
 	netbios name = $hostname
 	template shell = /bin/bash
 	kerberos method = system keytab
-	dedicated keytab file = /etc/krb5.keytab
-	wins support = yes
+	wins support = no
 $WINBIND_PARAMS
 $MAPPING_PARAMS
 ;	encrypt passwords = true
