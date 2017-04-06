@@ -627,6 +627,7 @@ case "$action" in
                 [ "$?" -ne 0 ] && exit 1
                 # prepare auth service
                 if [ -e "$sssd_conf" ]; then
+		    disable_service nscd
                     enable_service sssd
                 else
                     enable_service winbind
