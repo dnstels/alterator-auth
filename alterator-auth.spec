@@ -2,7 +2,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.33.1
+Version: 0.34
 Release: alt1
 
 BuildArch: noarch
@@ -112,6 +112,11 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Thu Apr 06 2017 Andrey Cherepanov <cas@altlinux.org> 0.34-alt1
+- task-auth-ad now is provided by task-auth-ad-sssd
+- Samba config cleanup, disable wins support
+- Disable service nscd for sssd
+
 * Wed Mar 29 2017 Andrey Cherepanov <cas@altlinux.org> 0.33.1-alt1
 - Wrap long line in warning
 
