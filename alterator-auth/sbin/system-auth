@@ -468,7 +468,7 @@ join_ad_domain()
 
     [ -x /usr/bin/kinit ] || fatal "krb5-kinit is required for join to Active Directory domain"
     [ -x "$net_cmd" ] || fatal "$net_cmd from samba-common or samba-common-tools package is required for join to Active Directory domain"
-    [ -n "$(ls /etc/init.d/{winbind,sssd})" ] || fatal "samba-winbind or sssd-ad is required for join to Active Directory domain"
+    [ -n "$(ls /etc/init.d/{winbind,sssd} 2>/dev/null)" ] || fatal "samba-winbind or sssd-ad is required for join to Active Directory domain"
 
     # Prepare Kerberos environment
     local i="$shell_ini_config_prefix"
