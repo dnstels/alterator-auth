@@ -283,8 +283,8 @@ set_domain_group_mapping()
 		/bin/mv -f /etc/role /etc/role.old
 		touch /etc/role
 	fi
-	roleadd users `cat $user_groups`
-	roleadd localadmins `cat $admin_groups`
+	roleadd users `cat $user_groups` &>/dev/null
+	roleadd localadmins `cat $admin_groups` &>/dev/null
 	# Add domain groups by its name
 	echo "Domain Users:users" >> /etc/role
 	echo "Domain Admins:localadmins" >> /etc/role
