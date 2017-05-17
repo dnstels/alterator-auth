@@ -46,7 +46,6 @@ Requires: krb5-kinit
 Requires: pam_mount
 Requires: libnss-role
 Requires: alterator-datetime
-Requires: gvfs-shares
 
 %description -n task-auth-ad-winbind
 Metapackage to authenticate in Active Directory domain by Winbind.
@@ -61,7 +60,6 @@ Requires: krb5-kinit
 Requires: pam_mount
 Requires: libnss-role
 Requires: alterator-datetime
-Requires: gvfs-shares
 
 Provides:  task-auth-ad = %EVR
 Obsoletes: task-auth-ad < %EVR
@@ -78,7 +76,6 @@ Requires: krb5-kinit
 Requires: pam_mount
 Requires: libnss-role
 Requires: alterator-datetime
-Requires: gvfs-shares
 
 %description -n task-auth-freeipa
 Metapackage to authenticate in FreeIPA domain.
