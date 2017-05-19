@@ -1,8 +1,12 @@
+%brp_strip_none %_alterator_libdir/*
+%add_verify_elf_skiplist %_alterator_libdir/*
+%add_findreq_skiplist %_alterator_libdir/*
+
 %define _altdata_dir %_datadir/alterator
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.34
+Version: 0.35
 Release: alt1
 
 BuildArch: noarch
@@ -31,6 +35,7 @@ Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
 BuildPreReq: alterator >= 4.7-alt4
+BuildRequires: guile22-devel
 
 %description
 Alterator module for system wide auth settings
@@ -109,6 +114,11 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Wed May 17 2017 Andrey Cherepanov <cas@altlinux.org> 0.35-alt1
+- Remove gvfs-shares from task-auth-* metapackages (ALT #33481)
+- Hide non-existing services list (ALT #33371)
+- Hide roleadd warnings about non-existing groups (ALT #33372)
+
 * Thu Apr 06 2017 Andrey Cherepanov <cas@altlinux.org> 0.34-alt1
 - task-auth-ad now is provided by task-auth-ad-sssd
 - Samba config cleanup, disable wins support
