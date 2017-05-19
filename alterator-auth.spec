@@ -1,15 +1,8 @@
-%brp_strip_none %_alterator_libdir/*
-%add_verify_elf_skiplist %_alterator_libdir/*
-%add_findreq_skiplist %_alterator_libdir/*
-
-%define _altdata_dir %_datadir/alterator
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
 Version: 0.35
 Release: alt1
-
-BuildArch: noarch
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
 
@@ -34,7 +27,7 @@ Conflicts: alterator-lookout < 1.6-alt6
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 4.7-alt4
+BuildPreReq: alterator >= 5.0 alterator-lookout
 BuildRequires: guile22-devel
 
 %description
@@ -92,6 +85,7 @@ Metapackage to authenticate in FreeIPA domain.
 %make_build libdir=%_libdir
 
 %install
+export GUILE_LOAD_PATH=/usr/share/alterator/lookout
 %makeinstall
 install -Dpm644 etc/user-groups %buildroot%_sysconfdir/alterator/auth/user-groups
 install -Dpm644 etc/admin-groups %buildroot%_sysconfdir/alterator/auth/admin-groups
@@ -101,8 +95,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files
 %config(noreplace) %_sysconfdir/alterator/auth/user-groups
 %config(noreplace) %_sysconfdir/alterator/auth/admin-groups
-%_datadir/alterator/applications/*
-%_datadir/alterator/ui/*/
+%_alterator_datadir/applications/*
+%_alterator_datadir/ui/*/
+%_alterator_libdir/ui/auth/*.go
 %_sbindir/system-auth
 %_hooksdir/90-auth
 %_alterator_backend3dir/*
