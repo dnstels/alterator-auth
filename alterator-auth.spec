@@ -2,7 +2,9 @@
 
 Name: alterator-auth
 Version: 0.35
-Release: alt1
+Release: alt0.M80P.1
+
+BuildArch: noarch
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
 
@@ -27,8 +29,7 @@ Conflicts: alterator-lookout < 1.6-alt6
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 5.0 alterator-lookout
-BuildRequires: guile22-devel
+BuildPreReq: alterator >= 4.7-alt4
 
 %description
 Alterator module for system wide auth settings
@@ -97,7 +98,6 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %config(noreplace) %_sysconfdir/alterator/auth/admin-groups
 %_alterator_datadir/applications/*
 %_alterator_datadir/ui/*/
-%_alterator_libdir/ui/auth/*.go
 %_sbindir/system-auth
 %_hooksdir/90-auth
 %_alterator_backend3dir/*
@@ -109,6 +109,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Mon May 22 2017 Andrey Cherepanov <cas@altlinux.org> 0.35-alt0.M80P.1
+- Backport new version to p8 branch
+
 * Wed May 17 2017 Andrey Cherepanov <cas@altlinux.org> 0.35-alt1
 - Remove gvfs-shares from task-auth-* metapackages (ALT #33481)
 - Hide non-existing services list (ALT #33371)
