@@ -430,7 +430,7 @@ init()
 # Enable service and (re)start it
 enable_service() {
     service="$1"
-    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.servce" ]; then
+    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.service" ]; then
         chkconfig $service on &>/dev/null
         [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
         service $service start >/dev/null
@@ -440,7 +440,7 @@ enable_service() {
 # Disable service and stop it
 disable_service() {
     service="$1"
-    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.servce" ]; then
+    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.service" ]; then
         chkconfig $service off &>/dev/null
         [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
     fi
