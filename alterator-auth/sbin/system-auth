@@ -457,6 +457,17 @@ set_hostname()
     fi
 }
 
+# Check domain name in DNS
+check_domain_in_dns()
+{
+    host -t srv "_kerberos._tcp.$1" | grep -q 'has SRV record' 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo "Unable to find specified domain" >&2
+        return 1
+    fi
+    return 0
+}
+
 # Join to Active Directory domin
 join_ad_domain()
 {
@@ -599,7 +610,7 @@ case "$action" in
 	  [ "$current" = "winbind" ] && disable_service winbind
 	  [ "$current" = "sss" ] && disable_service sssd
 
-	  case "$object" in
+        case "$object" in
         local)
             write_profile "$object"
             ;;
@@ -619,6 +630,8 @@ case "$action" in
         ad)
             if  test -n "$1" ;then
                 test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
+                # Check domain name in DNS
+                check_domain_in_dns "$1" || exit 1
                 init
                 write_profile "$object"
                 # Sync time with DC before join
@@ -642,6 +655,8 @@ case "$action" in
         freeipa)
             if  test -n "$1" ;then
                 test -x "$ipa_cmd" || fatal "Cannot find $ipa_cmd executable required to join to FreeIPA domain"
+                # Check domain name in DNS
+                check_domain_in_dns "$1" || exit 1
                 join_ipa_domain "$1" "$2" "$3" "$4"
                 [ "$?" -ne 0 ] && exit 1
                 # prepare auth service
