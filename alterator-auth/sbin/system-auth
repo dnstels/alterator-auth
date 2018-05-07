@@ -452,8 +452,6 @@ set_hostname()
     local FQDN="$(lower "$1")"
     if [ -n "$FQDN" ]; then
         shell_config_set "/etc/sysconfig/network" "HOSTNAME" "$FQDN"
-        hostname "$FQDN"
-        [ -x "/usr/bin/hostnamectl" ] && hostnamectl set-hostname "$FQDN"
     fi
 }
 
