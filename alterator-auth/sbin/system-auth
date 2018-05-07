@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo $0 $@ | grep -q '[[:space:]]-d\([[:space:]]\|$\)' && set -x
+
 rdelim='[[:space:]]\+'
 wdelim=' '
 
@@ -548,14 +550,17 @@ join_ipa_domain()
 
 usage() {
     cat << USAGE.
-Usage: system-auth action [object...]
+Usage: system-auth [-d] action [object...]
 Show or change system authentication scheme.
+
+Options:
+-d         Show debug output
 
 Actions:
 status     show current authentication information
 list       list available authentication schemes
 write      set authentication parameters
---version  Show current program verision
+--version  show current program version
 
 Examples:
 Show current authentication information
@@ -576,6 +581,7 @@ USAGE.
 }
 
 action="$1" ; shift
+[ "$action" = "-d" ] && action="$1" && shift
 [ $# -ge 1 ] && object="$1" && shift
 
 case "$action" in
