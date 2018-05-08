@@ -1,10 +1,6 @@
 (document:surround "/std/frame")
 
 ;;; Functions
-(define (update-domain)
-  (let ((domain (form-value "domain")))
-    (form-update-visibility '("domain_name") (string=? domain "custom"))))
-
 ;;; Show warning if field is empty
 (define (check-empty-field field name)
   (if (string=? (form-value field) "")
@@ -17,6 +13,9 @@
 
 ;;; Check for empty values if Active Directory setting up
 (define (field-check-values)
+  (if (string=? (form-value "auth-type") "krb5")
+      (begin
+          (check-empty-field "ldap_domain"   (_ "Domain"))))
   (if (string=? (form-value "auth-type") "ad")
       (begin
           (check-empty-field "ad_domain"   (_ "Domain"))
@@ -73,20 +72,9 @@
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
-    (form-update-value-list '("current_domain" "ccreds") data)
+    (form-update-value-list '("current_domain" "ccreds" "ldap_domain" "auth-type" "ad_domain" "ad_workgroup" "freeipa_domain") data)
 
-    ;;; Check avahi available for domain lookup
-    (woo-catch
-        (lambda() (form-update-enum "domain" (woo-list "/auth/avail_domain")))
-        (lambda(reason)
-                (avahi-warning visibility #t)
-            ))
     ;;; show warnings
-    (if (not (woo-get-option data 'service_avahi))
-      (begin
-        (avahi-warning  visibility  #t)
-        (alt-group-type activity    #f)
-        (alt-group      activity    #f)))
     (if (not (woo-get-option data 'type_ad_available))
       (begin
         (type-ad-warning visibility #t)
@@ -98,18 +86,9 @@
         (freeipa-group-type   activity   #f)
         (freeipa-group        activity   #f)))
 
-    ;;; fill fields
-    (form-update-value "domain" (woo-get-option data 'current_domain))
-
-    (form-update-value "auth-type"    (woo-get-option data 'auth_type))
-    (form-update-value "ad_domain"    (woo-get-option data 'ad_domain))
+    ;;; fill fields with custom rules
     (form-update-value "ad_host"      (woo-get-option data 'ad_host (woo-get-option data 'hostname)))
-    (form-update-value "ad_workgroup" (woo-get-option data 'ad_workgroup))
-
-    (form-update-value "freeipa_domain"    (woo-get-option data 'freeipa_domain))
-    (form-update-value "freeipa_host"      (woo-get-option data 'freeipa_host (woo-get-option data 'hostname)))
-
-    (update-domain)
+    (form-update-value "freeipa_host"   (woo-get-option data 'freeipa_host (woo-get-option data 'hostname)))
 
     ))
 
@@ -127,17 +106,13 @@
     (label)
 
     ;;; ALT domain
-    (document:id alt-group-type (radio name "auth-type" value "krb5" text (_ "ALT Linux domain")))
+    (document:id alt-group-type (radio name "auth-type" value "krb5" text (_ "ALT Linux domain or Astra Linux Directory")))
 
       (document:id alt-group (gridbox columns "0;0;50;50" spacing 5
 
-	;;; Warning if avahi-daemon is out of gear
-        (document:id avahi-warning (gridbox colspan 4 columns "0;100" visibility #f (label text "   ") (label
-          text (string-append (bold (_ "Warning: ")) (_ "Search for domains is impossible because avahi-daemon is not started")))))
-
         (label text "   ")
-        (document:id domain-list-label (label text (_ "Domain list:")))
-        (document:id domain-list (combobox name "domain"))
+        (document:id domain-list-label (label text (_ "Domain:")))
+        (document:id domain-list (edit name "ldap_domain"))
 	(spacer)
 
         (spacer colspan 2)
@@ -210,9 +185,7 @@
 
 (document:root
   (when loaded
-    (ui-init)
-    (form-bind "auth-type" "change" update-domain)
-    (form-bind "domain" "change" update-domain)))
+    (ui-init)))
 
 (frame:on-back (thunk (or (ui-commit) 'cancel)))
 (frame:on-next (thunk (or (ui-commit) 'cancel)))
