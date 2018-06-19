@@ -1,7 +1,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.35
+Version: 0.36
 Release: alt0.M80P.1
 
 BuildArch: noarch
@@ -109,6 +109,20 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Tue Jun 19 2018 Andrey Cherepanov <cas@altlinux.org> 0.36-alt0.M80P.1
+- Backport new version to p8 branch.
+
+* Tue May 08 2018 Andrey Cherepanov <cas@altlinux.org> 0.36-alt1
+- Change entry files for ALT Domain from combobox to inputbox to support
+  Astra Linux Directory.
+- Check domain name in DNS first in AD and FreeIPA join.
+- Add -d option for system-auth to show debug output.
+- Do not change hostname during join process (ALT #33723).
+- Fix typo in service file name (ALT #33224).
+
+* Fri Apr 13 2018 Grigory Ustinov <grenka@altlinux.org> 0.35-alt1.1.1
+- NMU: Replace BuildRequires for guile on e2k arch.
+
 * Mon May 22 2017 Andrey Cherepanov <cas@altlinux.org> 0.35-alt0.M80P.1
 - Backport new version to p8 branch
 

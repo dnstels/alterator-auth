@@ -191,28 +191,25 @@ on_message()
 		    get_ldap
 		    write_bool_param "ccreds" $(echo "$auth_type" | sed 's/krb5_ccreds/true/')
 		    write_string_param hostname "$(hostname -s)"
+                    write_string_param ldap_domain "$(get_domain_from_dns)"
 		    if [ "$auth_type" = "ad" ]; then
-                get_ad_info
-            else
-                write_string_param ad_domain "$(get_domain_from_dns)"
-            fi
-            if [ "$auth_type" = "freeipa" ]; then
-                get_freeipa_info
-            else
-                write_string_param freeipa_domain "$(get_domain_from_dns)"
-		if [ "$auth_type" != "ad" ]; then
-			write_string_param current_domain "$(read_current)"
-		fi
-            fi
-		    # Test for services available
-		    srv="false"
-		    service_control avahi-daemon is-active && srv="true"
-		    write_bool_param "service_avahi" "$srv"
+                	get_ad_info
+		    else
+			write_string_param ad_domain "$(get_domain_from_dns)"
+		    fi
+		    if [ "$auth_type" = "freeipa" ]; then
+			get_freeipa_info
+		    else
+			write_string_param freeipa_domain "$(get_domain_from_dns)"
+			if [ "$auth_type" != "ad" ]; then
+				write_string_param current_domain "$(read_current)"
+			fi
+		    fi
 		    srv="false"
 		    #rpm -q task-auth-ad &>/dev/null && srv="true"
 		    rpm -q task-auth-ad-sssd &>/dev/null && srv="true"
 		    write_bool_param "type_ad_available" "$srv"
-            srv="false"
+                    srv="false"
 		    rpm -q task-auth-freeipa &>/dev/null && srv="true"
 		    write_bool_param "type_freeipa_available" "$srv"
 		    ;;
@@ -227,7 +224,7 @@ on_message()
                     /usr/sbin/system-auth write ldap "$in_ldap_basedn" "$ldap_uri$in_ldap_host"
                     ;;
                 krb5)
-                    if [ "$in_domain" = "local" ]; then
+                    if [ "$in_ldap_domain" = "local" ]; then
                         /usr/sbin/system-auth write local
                     else
                         if [ "$in_ccreds" = "#t" ]; then
@@ -236,8 +233,8 @@ on_message()
                             auth_type=krb5
                         fi
                         ldap_uri="ldaps://"
-                        if [ -n "$in_domain" ]; then
-                            err="$(/usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_domain")" "$ldap_uri"ldap."$in_domain" 2>&1)"
+                        if [ -n "$in_ldap_domain" ]; then
+                            err="$(/usr/sbin/system-auth write $auth_type "$(host_2_dn "$in_ldap_domain")" "$ldap_uri"ldap."$in_ldap_domain" 2>&1)"
                             if [ $? -ne 0 ]; then
                                 write_error "`_ "Domain does not set:"` $err"
                             fi
@@ -251,6 +248,7 @@ on_message()
                 ad)
                     output="$(/usr/sbin/system-auth write ad "$in_ad_domain" "$in_ad_host" "$in_ad_workgroup" "$in_admin_username" "$in_admin_password" 2>&1)"
                     [ "$output" = "Netbios name should not be more 15 chars" ] && output="`_ "Netbios name should not be more 15 chars"`"
+                    [ "$output" = "Unable to find specified domain" ] && output="`_ "Unable to find specified domain"`"
                     [ "$output" = "Cannot contact KDC for realm" ] && output="`_ "Cannot contact KDC for realm"`"
                     [ "$output" = "Unknown administrator name" ] && output="`_ "Unknown administrator name"`"
                     [ "$output" = "Wrong password" ] && output="`_ "Wrong password"`"
@@ -258,6 +256,7 @@ on_message()
                     ;;
                 freeipa)
                     output="$(/usr/sbin/system-auth write freeipa "$in_ad_domain" "$in_ad_host" "$in_admin_username" "$in_admin_password" 2>&1)"
+                    echo "$output" | grep "Unable to find specified domain" ] && output="`_ "Unable to find specified domain"`"
                     echo "$output" | grep "^Unable to find IPA Server to join" && output="`_ "Unable to find IPA Server to join"`"
                     echo "$output" | grep "Password incorrect while getting initial credentials" && output="`_ "Incorrect administrator password"`"
                     echo "$output" | grep "^Client configuration complete.$" || write_error "`_ "Unable to join to FreeIPA domain:"` $output"

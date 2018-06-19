@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo $0 $@ | grep -q '[[:space:]]-d\([[:space:]]\|$\)' && set -x
+
 rdelim='[[:space:]]\+'
 wdelim=' '
 
@@ -430,7 +432,7 @@ init()
 # Enable service and (re)start it
 enable_service() {
     service="$1"
-    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.servce" ]; then
+    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.service" ]; then
         chkconfig $service on &>/dev/null
         [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
         service $service start >/dev/null
@@ -440,7 +442,7 @@ enable_service() {
 # Disable service and stop it
 disable_service() {
     service="$1"
-    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.servce" ]; then
+    if [ -e "/etc/init.d/$service" -o -e "/lib/systemd/system/$service.service" ]; then
         chkconfig $service off &>/dev/null
         [ -n "$(service $service status| grep '^active\|running$')" ] && service $service stop &>/dev/null
     fi
@@ -452,9 +454,18 @@ set_hostname()
     local FQDN="$(lower "$1")"
     if [ -n "$FQDN" ]; then
         shell_config_set "/etc/sysconfig/network" "HOSTNAME" "$FQDN"
-        hostname "$FQDN"
-        [ -x "/usr/bin/hostnamectl" ] && hostnamectl set-hostname "$FQDN"
     fi
+}
+
+# Check domain name in DNS
+check_domain_in_dns()
+{
+    host -t srv "_kerberos._tcp.$1" | grep -q 'has SRV record' 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo "Unable to find specified domain" >&2
+        return 1
+    fi
+    return 0
 }
 
 # Join to Active Directory domin
@@ -550,14 +561,17 @@ join_ipa_domain()
 
 usage() {
     cat << USAGE.
-Usage: system-auth action [object...]
+Usage: system-auth [-d] action [object...]
 Show or change system authentication scheme.
+
+Options:
+-d         Show debug output
 
 Actions:
 status     show current authentication information
 list       list available authentication schemes
 write      set authentication parameters
---version  Show current program verision
+--version  show current program version
 
 Examples:
 Show current authentication information
@@ -578,6 +592,7 @@ USAGE.
 }
 
 action="$1" ; shift
+[ "$action" = "-d" ] && action="$1" && shift
 [ $# -ge 1 ] && object="$1" && shift
 
 case "$action" in
@@ -595,7 +610,7 @@ case "$action" in
 	  [ "$current" = "winbind" ] && disable_service winbind
 	  [ "$current" = "sss" ] && disable_service sssd
 
-	  case "$object" in
+        case "$object" in
         local)
             write_profile "$object"
             ;;
@@ -615,6 +630,8 @@ case "$action" in
         ad)
             if  test -n "$1" ;then
                 test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
+                # Check domain name in DNS
+                check_domain_in_dns "$1" || exit 1
                 init
                 write_profile "$object"
                 # Sync time with DC before join
@@ -638,6 +655,8 @@ case "$action" in
         freeipa)
             if  test -n "$1" ;then
                 test -x "$ipa_cmd" || fatal "Cannot find $ipa_cmd executable required to join to FreeIPA domain"
+                # Check domain name in DNS
+                check_domain_in_dns "$1" || exit 1
                 join_ipa_domain "$1" "$2" "$3" "$4"
                 [ "$?" -ne 0 ] && exit 1
                 # prepare auth service
