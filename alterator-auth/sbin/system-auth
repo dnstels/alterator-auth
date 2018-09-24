@@ -391,6 +391,7 @@ AD_PARAMS)"
 	    ini_config_set "$sssd_conf" "domain/$domain" 'id_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'auth_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'chpass_provider' 'ad'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'access_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'default_shell' '/bin/bash'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'fallback_homedir' '/home/%d/%u'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'debug_level' '0'
