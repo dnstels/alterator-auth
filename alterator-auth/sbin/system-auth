@@ -515,13 +515,13 @@ join_ad_domain()
 	set_hostname "$host_name.$ldomain"
 
 	# Join to domain
-	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
+	$net_cmd ads join -U"$user%$password" --no-dns-updates
 
 	[ "$?" -ne 0 ] && return 1
 
 	# Register machine in domain DNS
 	if [ -n "$host_name" ]; then
-		$net_cmd ads dns register -U"$user%$password" "$FQDN"
+		$net_cmd ads dns register -U"$user%$password" "$host_name.$ldomain"
 	fi
 
 	# Destroy ticket
