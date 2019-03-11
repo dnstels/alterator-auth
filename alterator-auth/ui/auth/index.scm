@@ -13,15 +13,15 @@
 
 ;;; Check for empty values if Active Directory setting up
 (define (field-check-values)
-  (if (string=? (form-value "auth-type") "krb5")
+  (if (string=? (form-value "auth_type") "krb5")
       (begin
           (check-empty-field "ldap_domain"   (_ "Domain"))))
-  (if (string=? (form-value "auth-type") "ad")
+  (if (string=? (form-value "auth_type") "ad")
       (begin
           (check-empty-field "ad_domain"   (_ "Domain"))
           (check-empty-field "ad_host"     (_ "Netbios name"))
           (check-netbios-name)))
-  (if (string=? (form-value "auth-type") "freeipa")
+  (if (string=? (form-value "auth_type") "freeipa")
       (begin
           (check-empty-field "freeipa_domain"   (_ "Domain"))
           (check-empty-field "freeipa_host"     (_ "Host name")))))
@@ -33,8 +33,8 @@
 
 ;;; Apply button
 (define (ui-commit)
-  (if (not (or (string=? (form-value "auth-type") "ad")
-               (string=? (form-value "auth-type") "freeipa") ))
+  (if (not (or (string=? (form-value "auth_type") "ad")
+               (string=? (form-value "auth_type") "freeipa") ))
     ;;; For tcb and ALT Domain
     (ui-commit-simple)
     ;;; For Active Directory and FreeIPA
@@ -42,13 +42,13 @@
       (lambda()
         (field-check-values)
         ;; Show admin credentials dialog for ad and freeipa
-        (set-global! 'admin-creds (form-popup "/auth/admin-password" 'domain-type (form-value "auth-type")))
+        (set-global! 'admin-creds (form-popup "/auth/admin-password" 'domain-type (form-value "auth_type")))
         (if (not (string=? (admin-cred-param 'admin_username) ""))
           (begin
             (apply woo-write
                 "/auth"
                 "ldap_ssl" "on"
-                "auth_type" (form-value "auth-type")
+                "auth_type" (form-value "auth_type")
                 "admin_username" (admin-cred-param 'admin_username)
                 "admin_password" (admin-cred-param 'admin_password)
                 (form-value-list))
@@ -63,7 +63,7 @@
       (apply woo-write
          "/auth"
          "ldap_ssl" "on"
-         "auth_type" (form-value "auth-type")
+         "auth_type" (form-value "auth_type")
          "admin_username" (admin-cred-param 'admin_username)
          "admin_password" (admin-cred-param 'admin_password)
          (form-value-list))
@@ -72,7 +72,7 @@
 
 (define (ui-init)
     (let ((data (woo-read-first "/auth")))
-    (form-update-value-list '("current_domain" "ccreds" "ldap_domain" "auth-type" "ad_domain" "ad_workgroup" "freeipa_domain") data)
+    (form-update-value-list '("current_domain" "ccreds" "ldap_domain" "auth_type" "ad_domain" "ad_workgroup" "freeipa_domain") data)
 
     ;;; show warnings
     (if (not (woo-get-option data 'type_ad_available))
@@ -102,11 +102,11 @@
     (label name "current_domain" visibility #f)
 
     ;;; Local database
-    (radio name "auth-type" value "local" text (_ "Local database") state #t)
+    (radio name "auth_type" value "local" text (_ "Local database") state #t)
     (label)
 
     ;;; ALT domain
-    (document:id alt-group-type (radio name "auth-type" value "krb5" text (_ "ALT Linux domain or Astra Linux Directory")))
+    (document:id alt-group-type (radio name "auth_type" value "krb5" text (_ "ALT Linux domain or Astra Linux Directory")))
 
       (document:id alt-group (gridbox columns "0;0;50;50" spacing 5
 
@@ -124,7 +124,7 @@
     (label)
 
     ;;; Active Directory
-    (document:id ad-group-type (radio name "auth-type" value "ad" text (_ "Active Directory domain")))
+    (document:id ad-group-type (radio name "auth_type" value "ad" text (_ "Active Directory domain")))
 
       (document:id ad-group (gridbox columns "0;0;50;50" spacing 5
 
@@ -150,7 +150,7 @@
     (label)
 
     ;;; FreeIPA
-    (document:id freeipa-group-type (radio name "auth-type" value "freeipa" text (_ "FreeIPA domain")))
+    (document:id freeipa-group-type (radio name "auth_type" value "freeipa" text (_ "FreeIPA domain")))
 
       (document:id freeipa-group (gridbox columns "0;0;50;50" spacing 5
 
