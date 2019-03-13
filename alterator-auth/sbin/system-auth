@@ -451,6 +451,8 @@ write_sssd_ldap_conf()
 
     . shell-ini-config
     shell_ini_config_prefix=''
+    # Remove previous [domain/...] section
+    subst '/^\[domain\//,$d' "$sssd_conf"
     if [ -e "$sssd_conf" ]; then
         ini_config_set "$sssd_conf" 'sssd' 'services' 'nss, pam'
         ini_config_set "$sssd_conf" 'sssd' 'domains' "$domain"
