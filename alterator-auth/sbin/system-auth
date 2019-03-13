@@ -536,19 +536,30 @@ check_domain_in_dns()
     return 0
 }
 
+# Set parameter to /etc/krb5.conf
+krb5_config_set()
+{
+    local conf_file="$1"; shift
+    local section="$1"; shift
+    local param="$1"; shift
+    local value="$1"; shift
+    if grep -q "^[[:space:]]*$param[[:space:]]*=" "$conf_file" ; then
+        subst "s/^\([[:space:]]*$param[[:space:]]*=[[:space:]]*\).*$/\1$value/" "$conf_file"
+    else
+        subst "/^\[$section\]$/a $param = $value" "$conf_file"
+    fi
+}
+
 # Set Kerberos realm
 set_kerberos_realm()
 {
-    local i="$shell_ini_config_prefix"
-    export shell_ini_config_prefix=''
     test -e "$krb5_conf" || touch "$krb5_conf"
-    ini_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
-    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_kdc" "true"
-    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_realm" "false"
-    ini_config_set "$krb5_conf" "libdefaults" "default_ccache_name" "KEYRING:persistent:%{uid}"
+    krb5_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
+    krb5_config_set "$krb5_conf" "libdefaults" "dns_lookup_kdc" "true"
+    krb5_config_set "$krb5_conf" "libdefaults" "dns_lookup_realm" "false"
+    krb5_config_set "$krb5_conf" "libdefaults" "default_ccache_name" "KEYRING:persistent:%{uid}"
     # Prevent GSS failure in sssd (Server not found in Kerberos database)
-    ini_config_set "$krb5_conf" "libdefaults" "rdns" "false"
-    export shell_ini_config_prefix="$i"
+    krb5_config_set "$krb5_conf" "libdefaults" "rdns" "false"
     chmod a+r "$krb5_conf"
 }
 
