@@ -2,7 +2,7 @@
 
 Name: alterator-auth
 Version: 0.38
-Release: alt1
+Release: alt0.M80C.1
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
 
@@ -27,13 +27,9 @@ Conflicts: alterator-lookout < 1.6-alt6
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 5.0 alterator-lookout
+BuildPreReq: alterator alterator-lookout
 
-%ifarch %e2k
-BuildRequires: guile20-devel libguile20-devel
-%else
-BuildRequires: guile22-devel
-%endif
+BuildArch: noarch
 
 %description
 Alterator module for system wide auth settings
@@ -114,6 +110,9 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Wed Mar 13 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt0.M80C.1
+- Backport new version to c8 branch.
+
 * Wed Mar 13 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt1
 - Make ldap/krb5 authentication by SSSD instead on nss-ldapd.
 - Use own parser to set values in /etc/krb5.conf.
