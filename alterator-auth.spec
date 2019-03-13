@@ -1,10 +1,8 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.36
+Version: 0.38
 Release: alt0.M80P.1
-
-BuildArch: noarch
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
 
@@ -29,7 +27,9 @@ Conflicts: alterator-lookout < 1.6-alt6
 Provides: alterator-nsswitch = %version
 Obsoletes: alterator-nsswitch
 
-BuildPreReq: alterator >= 4.7-alt4
+BuildPreReq: alterator alterator-lookout
+
+BuildArch: noarch
 
 %description
 Alterator module for system wide auth settings
@@ -109,6 +109,17 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Wed Mar 13 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt0.M80P.1
+- Backport new version to p8 branch.
+
+* Wed Mar 13 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt1
+- Make ldap/krb5 authentication by SSSD instead on nss-ldapd.
+- Use own parser to set values in /etc/krb5.conf.
+
+* Wed Oct 03 2018 Alexey Sheplyakov <asheplyakov@altlinux.org> 0.37-alt1
+- AD: configure sssd to obey the group policy
+- AD: correctly update the (A) DNS record of the newly joined host
+
 * Tue Jun 19 2018 Andrey Cherepanov <cas@altlinux.org> 0.36-alt0.M80P.1
 - Backport new version to p8 branch.
 

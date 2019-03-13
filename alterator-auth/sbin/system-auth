@@ -40,6 +40,10 @@ admin_groups="/etc/alterator/auth/admin-groups"
 [ -f "$nssldapfile1" ] && nssldapfile="$nssldapfile1"
 [ -f "$nssldapfile2" ] && nssldapfile="$nssldapfile2"
 
+# Use old LDAP auth scheme (nss_ldap or nss-ldapd) or new one (sssd)
+ldap_auth_sssd="no"
+test rpm -q sssd &>/dev/null || ldap_auth_sssd="yes"
+
 . alterator-datetime-functions
 . shell-config
 . shell-ini-config
@@ -68,6 +72,8 @@ get_status()
             # test FreeIPA join
             if grep -q '^ipa_domain' "$sssd_conf" &>/dev/null; then
                 echo -n "freeipa " && pam_ipa_info
+            elif grep -q '^ldap_uri' "$sssd_conf" &>/dev/null; then
+                echo -n "krb5 " && pam_ldap_info
             else
                 echo -n "ad " && pam_ad_info
             fi
@@ -89,10 +95,15 @@ list()
     echo "ldap"
 
     # checking ldap and krb5 libs
-    [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_ldap.*')" ] &&
-	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libnss_ldap.so.*')" ] &&
-	[ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libkrb5.so.*')" ] &&
-	echo "krb5"
+    if [ "$ldap_auth_sssd" = "yes" ]; then
+        rpm -q sssd-ldap sssd-krb5 &>/dev/null &&
+        echo "krb5"
+    else
+        [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -name 'pam_ldap.*')" ] &&
+        [ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libnss_ldap.so.*')" ] &&
+        [ -n "$(find /$(getconf SLIB) -maxdepth 1 -name 'libkrb5.so.*')" ] &&
+        echo "krb5"
+    fi
 
     # checking winbind or sss libs
     [ -n "$(find /$(getconf SLIB)/security -maxdepth 1 -regextype egrep -regex '.*/pam_(winbind|sss).so')" ] &&
@@ -107,7 +118,10 @@ pam_ldap_info()
 {
     local uri basedn
 
-    if [ -f "$pamldapfile" ];then
+    if grep -q '^ldap_uri' "$sssd_conf" &>/dev/null; then
+        uri="$(sed -n 's/^ldap_uri *= *//p' "$sssd_conf")"
+        basedn="$(sed -n 's/^ldap_search_base *= *//p' "$sssd_conf")"
+    elif [ -f "$pamldapfile" ];then
         uri="$(read_pam_ldap uri)"
         basedn="$(read_pam_ldap base)"
     else
@@ -185,10 +199,21 @@ write_profile()
 	    write_nsswitch "group" "files"
 	    ;;
 	ldap|krb5*)
-	    /usr/sbin/control system-auth "$scheme"
-	    write_nsswitch "passwd" "files ldap"
-	    write_nsswitch "shadow" "tcb files ldap"
-	    write_nsswitch "group" "files [SUCCESS=merge] ldap"
+        if [ "$ldap_auth_sssd" = "yes"  ]; then
+            /usr/sbin/control system-auth "sss"
+            write_nsswitch "passwd" "files sss"
+            write_nsswitch "shadow" "tcb files sss"
+            if [ -x /usr/bin/rolelst ]; then
+                write_nsswitch "group" "files [SUCCESS=merge] sss role"
+            else
+                write_nsswitch "group" "files [SUCCESS=merge] sss"
+            fi
+        else
+            /usr/sbin/control system-auth "$scheme"
+            write_nsswitch "passwd" "files ldap"
+            write_nsswitch "shadow" "tcb files ldap"
+            write_nsswitch "group" "files [SUCCESS=merge] ldap"
+        fi
 	    ;;
 	ad)
 	    if [ -e "$sssd_conf" ]; then
@@ -391,6 +416,7 @@ AD_PARAMS)"
 	    ini_config_set "$sssd_conf" "domain/$domain" 'id_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'auth_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'chpass_provider' 'ad'
+	    ini_config_set "$sssd_conf" "domain/$domain" 'access_provider' 'ad'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'default_shell' '/bin/bash'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'fallback_homedir' '/home/%d/%u'
 	    ini_config_set "$sssd_conf" "domain/$domain" 'debug_level' '0'
@@ -417,6 +443,48 @@ AD_PARAMS)"
 	adapt_dm
 }
 
+write_sssd_ldap_conf()
+{
+    local domain="$1"
+    local basedn="$2"
+    local ldapuri="$3"
+
+    . shell-ini-config
+    shell_ini_config_prefix=''
+    # Remove previous [domain/...] section
+    subst '/^\[domain\//,$d' "$sssd_conf"
+    if [ -e "$sssd_conf" ]; then
+        ini_config_set "$sssd_conf" 'sssd' 'services' 'nss, pam'
+        ini_config_set "$sssd_conf" 'sssd' 'domains' "$domain"
+        ini_config_set "$sssd_conf" "domain/$domain" 'id_provider' 'ldap'
+        ini_config_set "$sssd_conf" "domain/$domain" 'auth_provider' 'krb5'
+        ini_config_set "$sssd_conf" "domain/$domain" 'chpass_provider' 'krb5'
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_uri' "$ldapuri"
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_tls_reqcert' 'never'
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_search_base' "$basedn"
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_user_object_class' 'posixAccount'
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_group_object_class' 'posixGroup'
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_user_home_directory' 'homeDirectory'
+        ini_config_set "$sssd_conf" "domain/$domain" 'ldap_force_upper_case_realm' 'true'
+        ini_config_set "$sssd_conf" "domain/$domain" 'krb5_server' "$domain"
+        ini_config_set "$sssd_conf" "domain/$domain" 'krb5_realm' "$(upper $domain)"
+        ini_config_set "$sssd_conf" "domain/$domain" 'debug_level' '0'
+        chmod 0600 "$sssd_conf"
+    fi
+
+    # Prepare Kerberos environment
+    set_kerberos_realm "$domain"
+
+    # Map domain groups to local Unix groups
+    set_domain_group_mapping
+
+    # Set time sync from dc for client
+    write_pool "$domain"
+    write_ntp_status "#t"
+
+    # Adapt DM for too many domain users
+    adapt_dm
+}
 
 #initial settings
 init()
@@ -468,6 +536,33 @@ check_domain_in_dns()
     return 0
 }
 
+# Set parameter to /etc/krb5.conf
+krb5_config_set()
+{
+    local conf_file="$1"; shift
+    local section="$1"; shift
+    local param="$1"; shift
+    local value="$1"; shift
+    if grep -q "^[[:space:]]*$param[[:space:]]*=" "$conf_file" ; then
+        subst "s/^\([[:space:]]*$param[[:space:]]*=[[:space:]]*\).*$/\1$value/" "$conf_file"
+    else
+        subst "/^\[$section\]$/a $param = $value" "$conf_file"
+    fi
+}
+
+# Set Kerberos realm
+set_kerberos_realm()
+{
+    test -e "$krb5_conf" || touch "$krb5_conf"
+    krb5_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
+    krb5_config_set "$krb5_conf" "libdefaults" "dns_lookup_kdc" "true"
+    krb5_config_set "$krb5_conf" "libdefaults" "dns_lookup_realm" "false"
+    krb5_config_set "$krb5_conf" "libdefaults" "default_ccache_name" "KEYRING:persistent:%{uid}"
+    # Prevent GSS failure in sssd (Server not found in Kerberos database)
+    krb5_config_set "$krb5_conf" "libdefaults" "rdns" "false"
+    chmod a+r "$krb5_conf"
+}
+
 # Join to Active Directory domin
 join_ad_domain()
 {
@@ -482,17 +577,7 @@ join_ad_domain()
     [ -n "$(ls /etc/init.d/{winbind,sssd} 2>/dev/null)" ] || fatal "samba-winbind or sssd-ad is required for join to Active Directory domain"
 
     # Prepare Kerberos environment
-    local i="$shell_ini_config_prefix"
-    export shell_ini_config_prefix=''
-    test -e "$krb5_conf" || touch "$krb5_conf"
-    ini_config_set "$krb5_conf" "libdefaults" "default_realm" "$(upper $1)"
-    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_kdc" "true"
-    ini_config_set "$krb5_conf" "libdefaults" "dns_lookup_realm" "false"
-    ini_config_set "$krb5_conf" "libdefaults" "default_ccache_name" "KEYRING:persistent:%{uid}"
-    # Prevent GSS failure in sssd (Server not found in Kerberos database)
-    ini_config_set "$krb5_conf" "libdefaults" "rdns" "false"
-    export shell_ini_config_prefix="$i"
-    chmod a+r "$krb5_conf"
+    set_kerberos_realm "$ldomain"
 
     # Remove local DNS from resolvconf
     subst '/^name_servers=127.0.0.1/d' /etc/resolvconf.conf
@@ -514,13 +599,13 @@ join_ad_domain()
 	set_hostname "$host_name.$ldomain"
 
 	# Join to domain
-	$net_cmd ads join -U"$user%$password" | grep -v '^Using short domain name'
+	$net_cmd ads join -U"$user%$password" --no-dns-updates
 
 	[ "$?" -ne 0 ] && return 1
 
 	# Register machine in domain DNS
 	if [ -n "$host_name" ]; then
-		$net_cmd ads dns register -U"$user%$password" "$FQDN"
+		$net_cmd ads dns register -U"$user%$password" "$host_name.$ldomain"
 	fi
 
 	# Destroy ticket
@@ -616,13 +701,33 @@ case "$action" in
             ;;
         ldap|krb5*)
             if  check_basedn "$1" && check_uri "$2"  ;then
-                init
-                write_profile "$object"
-                write_2_ldap base "$1"
-                write_2_ldap uri "$2"
-                # if nss-ldapd is used, restart daemon
-                enable_service nslcd
-                enable_service settime-rfc867
+                if [ "$ldap_auth_sssd" = "yes" ]; then
+                    rpm -q sssd-ldap sssd-krb5 &>/dev/null || fatal "LDAP authentication with SSSD requires both sssd-ldap and sssd-krb5 packages installed"
+                    write_profile "$object"
+
+                    # Extract domain name from ldap_uri
+                    domain="${2##*/}"
+                    domain="${domain##ldap.}"
+
+                    # Store configuration parameters: domain baseDN ldap_uri
+                    write_sssd_ldap_conf "$domain" "$1" "$2"
+
+                    # Make topdir for home directories for Astra Linux Directory
+                    domain_type="$(ldapsearch -x -LLL -b "$1" -h "$domain" -s base o | sed -n 's/o: //p')"
+                    if [ "$domain_type" = "Astra Linux Directory" ]; then
+                        mkdir /ald_home 2>/dev/null
+                    fi
+
+                    enable_service sssd
+                else
+                    init
+                    write_profile "$object"
+                    write_2_ldap base "$1"
+                    write_2_ldap uri "$2"
+                    # if nss-ldapd is used, restart daemon
+                    enable_service nslcd
+                    enable_service settime-rfc867
+                fi
             else
                 exit 1
             fi
@@ -632,7 +737,6 @@ case "$action" in
                 test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
                 # Check domain name in DNS
                 check_domain_in_dns "$1" || exit 1
-                init
                 write_profile "$object"
                 # Sync time with DC before join
                 $net_cmd time set -S "$1" &>/dev/null
