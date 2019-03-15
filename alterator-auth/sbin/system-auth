@@ -320,7 +320,7 @@ set_domain_group_mapping()
 adapt_dm()
 {
 	if [ -e /etc/lightdm/lightdm.conf ]; then
-		ini_config_set /etc/lightdm/lightdm.conf "SeatDefaults" "greeter-hide-users" "true"
+		ini_config_set /etc/lightdm/lightdm.conf "SeatDefaults" "greeter-hide-users" "false"
 		chmod a+r /etc/lightdm/lightdm.conf
 	fi
 	if [ -e /etc/lightdm/lightdm-gtk-greeter.conf ]; then
