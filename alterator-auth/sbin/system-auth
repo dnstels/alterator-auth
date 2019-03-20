@@ -359,12 +359,14 @@ write_ad_conf()
         idmap uid = 10000-20000000
         idmap gid = 10000-20000000
         idmap backend = tdb
-MAPPING_PARAMS_SAMBA3)"
+MAPPING_PARAMS_SAMBA3
+)"
 	else
 	    MAPPING_PARAMS="$(cat << MAPPING_PARAMS_SAMBA4
         idmap config * : range = 10000-20000000
         idmap config * : backend = tdb
-MAPPING_PARAMS_SAMBA4)"
+MAPPING_PARAMS_SAMBA4
+)"
 	fi
 
 	if [ -e "$sssd_conf" ]; then
@@ -376,7 +378,8 @@ MAPPING_PARAMS_SAMBA4)"
 	winbind enum groups = no
 	winbind refresh tickets = yes
 	winbind offline logon = yes
-MAPPING_PARAMS_WINBIND)"
+MAPPING_PARAMS_WINBIND
+)"
 	fi
 
 	# Write main parameters
@@ -402,7 +405,8 @@ $MAPPING_PARAMS
 ;	show add printer wizard = no
 ;	printcap name = /dev/null
 ;	disable spoolss = yes
-AD_PARAMS)"
+AD_PARAMS
+)"
 
 	# Replace entire section [global] in /etc/samba/smb.conf by new config
 	sed -i -e "/^\[global\]/,/^\[/ {/^\([^[]\|$\)/d};/^\[global\]/a\\`echo "$CONFIG"|sed ':a;{N;s/\n/\\\\n/};ba'`" "$smb_conf"
