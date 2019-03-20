@@ -70,6 +70,22 @@ Obsoletes: task-auth-ad < %EVR
 %description -n task-auth-ad-sssd
 Metapackage to authenticate in Active Directory domain by SSSD.
 
+%package -n task-auth-ldap-sssd
+Summary: Metapackage to authenticate in LDAP domain by sssd
+Group: System/Configuration/Other
+Requires: alterator-auth
+Requires: sssd-ldap
+Requires: sssd-krb5
+Requires: krb5-kinit
+Requires: pam_mount
+Requires: libnss-role
+
+Provides:  task-auth-ldap = %EVR
+Obsoletes: task-auth-ldap < %EVR
+
+%description -n task-auth-ldap-sssd
+Metapackage to authenticate in LDAP domain by SSSD.
+
 %package -n task-auth-freeipa
 Summary: Metapackage to authenticate in FreeIPA domain
 Group: System/Configuration/Other
@@ -110,6 +126,8 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-ad-winbind
 
 %files -n task-auth-ad-sssd
+
+%files -n task-auth-ldap-sssd
 
 %files -n task-auth-freeipa
 
