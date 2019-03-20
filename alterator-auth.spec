@@ -1,8 +1,8 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.38
-Release: alt2
+Version: 0.39
+Release: alt1
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
 
@@ -132,6 +132,10 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 %files -n task-auth-freeipa
 
 %changelog
+* Wed Mar 20 2019 Andrey Cherepanov <cas@altlinux.org> 0.39-alt1
+- Add package task-auth-ldap-sssd.
+- Fix here-document blocks in system-auth for bash4.
+
 * Fri Mar 15 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt2
 - Do not hide user in lightdm-gtk-greeter because it hides they at all.
 
