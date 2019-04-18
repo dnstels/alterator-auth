@@ -1,7 +1,7 @@
 %define _hooksdir %_sysconfdir/hooks/hostname.d
 
 Name: alterator-auth
-Version: 0.38
+Version: 0.40
 Release: alt0.M80P.1
 
 %filter_from_requires /^samba-common$/d;/systemd-services/d
@@ -15,7 +15,6 @@ Requires: alterator >= 4.7-alt4
 Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.7.0-alt1
 Requires: pam_krb5
-Requires: nss-ldap
 Requires: libnss-myhostname
 Requires: avahi-daemon
 Requires: settime-rfc867
@@ -66,6 +65,22 @@ Obsoletes: task-auth-ad < %EVR
 %description -n task-auth-ad-sssd
 Metapackage to authenticate in Active Directory domain by SSSD.
 
+%package -n task-auth-ldap-sssd
+Summary: Metapackage to authenticate in LDAP domain by sssd
+Group: System/Configuration/Other
+Requires: alterator-auth
+Requires: sssd-ldap
+Requires: sssd-krb5
+Requires: krb5-kinit
+Requires: pam_mount
+Requires: libnss-role
+
+Provides:  task-auth-ldap = %EVR
+Obsoletes: task-auth-ldap < %EVR
+
+%description -n task-auth-ldap-sssd
+Metapackage to authenticate in LDAP domain by SSSD.
+
 %package -n task-auth-freeipa
 Summary: Metapackage to authenticate in FreeIPA domain
 Group: System/Configuration/Other
@@ -106,9 +121,26 @@ install -Dpm755 hooks/auth %buildroot/%_hooksdir/90-auth
 
 %files -n task-auth-ad-sssd
 
+%files -n task-auth-ldap-sssd
+
 %files -n task-auth-freeipa
 
 %changelog
+* Thu Apr 18 2019 Andrey Cherepanov <cas@altlinux.org> 0.40-alt0.M80P.1
+- Backport new version to p8 branch.
+- Revert "Do not hide user in lightdm-gtk-greeter because it hides they at all." for old lightdm-gtk-greeter.
+
+* Thu Apr 18 2019 Andrey Cherepanov <cas@altlinux.org> 0.40-alt1
+- Do not require nss-ldap by default.
+- Disable nscd if sssd is used.
+
+* Wed Mar 20 2019 Andrey Cherepanov <cas@altlinux.org> 0.39-alt1
+- Add package task-auth-ldap-sssd.
+- Fix here-document blocks in system-auth for bash4.
+
+* Fri Mar 15 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt2
+- Do not hide user in lightdm-gtk-greeter because it hides they at all.
+
 * Wed Mar 13 2019 Andrey Cherepanov <cas@altlinux.org> 0.38-alt0.M80P.1
 - Backport new version to p8 branch.
 
