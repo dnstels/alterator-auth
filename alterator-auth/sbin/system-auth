@@ -723,6 +723,7 @@ case "$action" in
                     fi
 
                     enable_service sssd
+                    disable_service nscd
                 else
                     init
                     write_profile "$object"
