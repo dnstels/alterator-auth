@@ -15,7 +15,6 @@ Requires: alterator >= 4.7-alt4
 Requires: alterator-l10n >= 2.0-alt1
 Requires: pam-config >= 1.7.0-alt1
 Requires: pam_krb5
-Requires: nss-ldap
 Requires: libnss-myhostname
 Requires: avahi-daemon
 Requires: settime-rfc867
