@@ -740,7 +740,7 @@ case "$action" in
         ad)
             if  test -n "$1" ;then
                 test -x "$net_cmd" || fatal "Cannot find $net_cmd executable required to join to Active Directory domain"
-                write_nsswitch "hosts" "files dns myhostname"
+                write_nsswitch "hosts" "files dns mdns4_minimal myhostname fallback"
                 # Check domain name in DNS
                 check_domain_in_dns "$1" || exit 1
                 write_profile "$object"
